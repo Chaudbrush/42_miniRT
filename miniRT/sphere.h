@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 14:46:51 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/11/29 18:17:22 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,9 @@ typedef struct s_sphere
 {
 	int		type;
 	t_types	*next;
-	double	coords[3]; // Center of the sphere
-	double	radius;
-	int		rgb[3]; // Receive the data as 0, 255, 128. Convert it to hex and store in the in the integer
+	float	coords[3]; // Center of the sphere
+	float	radius;
+	t_uchar	rgb[3]; // Receive the data as 0, 255, 128. Convert it to hex and store in the in the integer
 }	t_sphere;
 
 typedef struct s_plane
@@ -51,7 +51,7 @@ typedef struct s_plane
 	t_types	*next;
 	float	coords[3]; // A point in the plane ?
 	float	vector[3]; // Normalized vector, can be from [-1, 1]
-	int		rgb[3];
+	t_uchar	rgb[3];
 }	t_plane;
 
 typedef struct s_cylinder
@@ -62,19 +62,19 @@ typedef struct s_cylinder
 	float	vector[3]; // Normalized vector, can be from [-1, 1]
 	float	radius;
 	float	height;
-	int		rgb[3];
+	t_uchar	rgb[3];
 }	t_cylinder;
 
 typedef struct s_ambient
 {
 	float	ratio; // From [0.0, 1.0]
-	t_uchar	color[3]; // RGB
+	t_uchar	rgb[3]; // RGB
 }	t_ambient;
 
 typedef struct s_camera
 {
 	float	coords[3];
-	float	norm_vector[3]; // From [-1.0, 1.0]
+	float	vector[3]; // From [-1.0, 1.0]
 	int		fov; // From [0, 180]
 }	t_camera;
 
@@ -82,7 +82,7 @@ typedef struct s_light
 {
 	float	coords[3];
 	float	brigthness; // From [0.0, 1.0]
-	t_uchar	color[3]; // NOT NECESSARY IN MANDATORY
+	t_uchar	rgb[3]; // NOT NECESSARY IN MANDATORY
 }	t_light;
 
 typedef struct s_img
@@ -173,5 +173,8 @@ void	ft_lstadd_back(t_types **lst, t_types *node);
 // DELETE
 void	print_list(t_types *lst);
 
+
+int	init_int_array(char *str, t_uchar *array);
+int	init_float_array(char *str, float *array, int flag);
 
 #endif

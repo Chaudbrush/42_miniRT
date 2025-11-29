@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 14:53:47 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/11/29 21:35:44 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,8 +147,8 @@ void	print_list(t_types *lst)
 {
 	t_cylinder	*cyl;
 	t_sphere	*sphere;
+	t_plane		*plane;
 
-	
 	while (lst)
 	{
 		if (lst->type == 'y')
@@ -168,6 +168,14 @@ void	print_list(t_types *lst)
 			printf("coords: %f,%f,%f\n", sphere->coords[0], sphere->coords[1], sphere->coords[2]);
 			printf("radius: %f\n", sphere->radius);
 			printf("rgb: %d,%d,%d\n", sphere->rgb[0], sphere->rgb[1], sphere->rgb[2]);
+		}
+		else if (lst->type == 'p')
+		{
+			plane = (t_plane *)lst;
+			printf("\nPLANE\n");
+			printf("coords: %f,%f,%f\n", plane->coords[0], plane->coords[1], plane->coords[2]);
+			printf("vector: %f,%f,%f\n", plane->vector[0], plane->vector[1], plane->vector[2]);
+			printf("rgb: %d,%d,%d\n", plane->rgb[0], plane->rgb[1], plane->rgb[2]);
 		}
 		lst = lst->next;
 	}
