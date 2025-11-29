@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 12:44:51 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/11/29 14:46:51 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ typedef struct s_plane
 {
 	int		type;
 	t_types	*next;
-	double	coords[3]; // A point in the plane ?
-	int		vector[3]; // Normalized vector, can be from [-1, 1]
+	float	coords[3]; // A point in the plane ?
+	float	vector[3]; // Normalized vector, can be from [-1, 1]
 	int		rgb[3];
 }	t_plane;
 
@@ -58,10 +58,10 @@ typedef struct s_cylinder
 {
 	int		type;
 	t_types	*next;
-	double	coords[3]; // Center of the cylinder
-	int		vector[3]; // Normalized vector, can be from [-1, 1]
-	double	radius;
-	double	height;
+	float	coords[3]; // Center of the cylinder
+	float	vector[3]; // Normalized vector, can be from [-1, 1]
+	float	radius;
+	float	height;
 	int		rgb[3];
 }	t_cylinder;
 

@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 11:40:03 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/11/29 14:53:47 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,9 +145,30 @@ int	key_handler(int keysym, t_program *data)
 // DELETE
 void	print_list(t_types *lst)
 {
+	t_cylinder	*cyl;
+	t_sphere	*sphere;
+
+	
 	while (lst)
 	{
-		printf("type: %c\n", lst->type);
+		if (lst->type == 'y')
+		{
+			cyl = (t_cylinder *)lst;
+			printf("\nCYLINDER\n");
+			printf("coords: %f,%f,%f\n", cyl->coords[0], cyl->coords[1], cyl->coords[2]);
+			printf("vector: %f,%f,%f\n", cyl->vector[0], cyl->vector[1], cyl->vector[2]);
+			printf("radius: %f\n", cyl->radius);
+			printf("height: %f\n", cyl->height);
+			printf("rgb: %d,%d,%d\n", cyl->rgb[0], cyl->rgb[1], cyl->rgb[2]);
+		}
+		else if (lst->type == 's')
+		{
+			sphere = (t_sphere *)lst;
+			printf("\nSPHERE\n");
+			printf("coords: %f,%f,%f\n", sphere->coords[0], sphere->coords[1], sphere->coords[2]);
+			printf("radius: %f\n", sphere->radius);
+			printf("rgb: %d,%d,%d\n", sphere->rgb[0], sphere->rgb[1], sphere->rgb[2]);
+		}
 		lst = lst->next;
 	}
 }

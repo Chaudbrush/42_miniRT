@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 13:12:20 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/11/29 14:55:24 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,10 +278,10 @@ t_types	*init_sphere(char **args)
 		return (NULL);
 	while (nums[++i])
 	{
-		nb = ft_atolf(nums[i]);
-		if (!is_valid_float(nums[i], nb))
+		num = ft_atolf(nums[i]);
+		if (!is_valid_float(nums[i], num))
 			return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-		node->coords[i] = nb;
+		node->coords[i] = num;
 	}
 	free_args(nums);
 
@@ -334,29 +334,32 @@ t_types	*init_cylinder(char **args)
 
 	// Coords
 	i = -1;
+	printf("\n\n%s\n\n", args[1]);
 	nums = ft_split(args[1], ',');
 	if (!nums)
 		return (NULL);
 	while (nums[++i])
 	{
-		nb = ft_atolf(nums[i]);
-		if (!is_valid_float(nums[i], nb))
+		num = ft_atolf(nums[i]);
+		if (!is_valid_float(nums[i], num))
 			return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-		node->coords[i] = nb;
+		node->coords[i] = num;
 	}
 	free_args(nums);
 
 	// Vector
 	i = -1;
+	printf("\n\n%s\n\n", args[2]);
 	nums = ft_split(args[2], ',');
 	if (!nums)
 		return (NULL);
 	while (nums[++i])
 	{
-		nb = ft_atolf(nums[i]);
-		if (!is_valid_float(nums[i], nb) || nb < 0.0 || nb > 1.0)
+		printf("nums index %i: %s\n", i, nums[i]);
+		num = ft_atolf(nums[i]);
+		if (!is_valid_float(nums[i], num) || num < 0.0 || num > 1.0)
 			return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-		node->coords[i] = nb;
+		node->vector[i] = num;
 	}
 	free_args(nums);
 
@@ -372,7 +375,7 @@ t_types	*init_cylinder(char **args)
 	if (!is_valid_float(args[4], num))
 		return (ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
 	else
-		node->radius = num;
+		node->height = num;
 
 	// rgb
 	i = -1;
