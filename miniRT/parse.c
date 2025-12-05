@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 21:31:21 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/02 17:24:18 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,7 @@ int	parse_data(t_program *data, int argc, char **argv)
 		line = get_next_line(fd);
 	}
 	if (count == 0)
-	{
-		printf("-error: Empty file\n");
-		return (1);
-	}
+		return (close(fd), ft_putstr_fd(EMPTY_ERR, 2), 1);
 	data->objects = objects;
 	close(fd);
 	free(line);
@@ -53,16 +50,15 @@ int	parse_line(t_program *data, char *str, t_types **objects)
 	char	**args;
 	t_types	*node;
 
-
 	if (!str)
 		return (1);
 	flag = 0;
 	len = ft_strlen(str);
 	if (str[len - 1] == '\n')
 		str[len - 1] = ' ';
-	args =  ft_split(str, ' '); // Do we need to take care of all whitespaces?
+	args = ft_split(str, ' '); // Do we need to take care of all whitespaces?
 	if (!args)
-		return (ft_putstr_fd("-error: Malloc Failure\n", 2), 1);
+		return (ft_putstr_fd(MALLOC_ERR, 2), 1);
 	if (ft_strcmp(args[0], "A") == 0)
 		flag = init_ambient(data, args);
 	else if (ft_strcmp(args[0], "C") == 0)
@@ -81,74 +77,89 @@ int	parse_line(t_program *data, char *str, t_types **objects)
 	return (flag);
 }
 
-t_types	*initialize_node(char **args)
-{
-	if (!args)
-		return (NULL);
-	else if (ft_strcmp(args[0], "sp") == 0)
-		return (init_sphere(args));
-	else if (ft_strcmp(args[0], "pl") == 0)
-		return (init_plane(args));
-	else if (ft_strcmp(args[0], "cy") == 0)
-		return (init_cylinder(args));
-	else
-		return (ft_putstr_fd("-error: Invalid Identifier\n", 2), NULL);
-}
-
-void	ft_lstadd_back(t_types **lst, t_types *node)
-{
-	t_types	*last;
-
-	if (!lst)
-		return ;
-	if (!*lst)
-		*lst = node;
-	else
-	{
-		last = *lst;
-		while (last->next)
-			last = last->next;
-		last->next = node;
-	}
-}
-
 // IN CASE OF INVALID DATA, RETURN 1
 int	init_ambient(t_program *data, char **args)
 {
-//	int		i;
-//	int		nb;
 	double	num;
-//	char	**nums;
 
-//	printf("ambient\n");
 	if (argv_size(args) != 3)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-//	i = -1;
+		return (ft_putstr_fd(QUANTITY_ERR, 2), 1);
 	num = ft_atolf(args[1]);
 	if (!is_valid_float(args[1], num) || num < 0.0 || num > 1.0)
-		return (ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
+		return (ft_putstr_fd(NUMBER_ERR, 2), 1);
 	else
-		data->ambient_light.ratio = num;
-	if (init_int_array(args[2], data->ambient_light.rgb))
+		data->ambient.ratio = num;
+	if (init_int_array(args[2], &data->ambient.color))
 		return (1);
-	// nums = ft_split(args[2], ',');
-	// if (argv_size(nums) != 3)
-	// 	return (free_args(nums), ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-	// if (!nums)
-	// 	return (1);
-	// while (nums[++i])
-	// {
-	// 	nb = ft_atoi(nums[i]);
-	// 	if (!is_valid_int(nums[i]) || num < 0 || num > 255)
-	// 		return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	// 	data->ambient_light.color[i] = nb;
-	// }
-	// free_args(nums);
 	return (0);
 }
 
+int	init_camera(t_program *data, char **args)
+{
+	int		nb;
 
-int	init_int_array(char *str, t_uchar *array)
+	if (argv_size(args) != 4)
+		return (ft_putstr_fd(QUANTITY_ERR, 2), 1);
+	if (init_float_array(args[1], &data->camera.coords, 0))
+		return (1);
+	if (init_float_array(args[2], &data->camera.vector, 1))
+		return (1);
+	nb = ft_atoi(args[3]);
+	if (!is_valid_int(args[3]) || nb < 0 || nb > 180)
+		return (ft_putstr_fd(NUMBER_ERR, 2), 1);
+	else
+		data->camera.fov = nb;
+	return (0);
+}
+
+int	init_light(t_program *data, char **args)
+{
+	double	nb;
+
+	if (argv_size(args) != 4)
+		return (ft_putstr_fd(QUANTITY_ERR, 2), 1);
+	if (init_float_array(args[1], &data->light.coords, 0))
+		return (1);
+	nb = ft_atolf(args[2]);
+	if (!is_valid_float(args[2], nb) || nb < 0.0 || nb > 1.0)
+		return (ft_putstr_fd(NUMBER_ERR, 2), 1);
+	else
+		data->light.brigthness = nb;
+	if (init_int_array(args[3], &data->light.color))
+		return (1);
+	return (0);
+}
+
+// OLD
+// int	init_int_array(char *str, t_uchar *array)
+// {
+// 	int		i;
+// 	int		len;
+// 	int		nb;
+// 	char	**args;
+
+// 	len = ft_strlen(str);
+// 	if (str[len - 1] == ',')
+// 		str[len - 1] = ' ';
+// 	args = ft_split(str, ',');
+// 	if (!args)
+// 		return (ft_putstr_fd(MALLOC_ERR, 2), 1);
+// 	if (argv_size(args) != 3)
+// 		return (free_args(args), ft_putstr_fd(QUANTITY_ERR, 2), 1);
+// 	i = -1;
+// 	while (args[++i])
+// 	{
+// 		nb = ft_atoi(args[i]);
+// 		if (!is_valid_int(args[i]) || nb < 0 || nb > 255)
+// 			return (free_args(args), ft_putstr_fd(NUMBER_ERR, 2), 1);
+// 		array[i] = nb;
+// 	}
+// 	free_args(args);
+// 	return (0);
+// }
+
+// DONE
+int	init_int_array(char *str, t_vec3 *color)
 {
 	int		i;
 	int		len;
@@ -160,24 +171,27 @@ int	init_int_array(char *str, t_uchar *array)
 		str[len - 1] = ' ';
 	args = ft_split(str, ',');
 	if (!args)
-		return (ft_putstr_fd("-error: Malloc Failure\n", 2), 1);
+		return (ft_putstr_fd(MALLOC_ERR, 2), 1);
 	if (argv_size(args) != 3)
-		return (free_args(args), ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
+		return (free_args(args), ft_putstr_fd(QUANTITY_ERR, 2), 1);
 	i = -1;
 	while (args[++i])
 	{
 		nb = ft_atoi(args[i]);
 		if (!is_valid_int(args[i]) || nb < 0 || nb > 255)
-			return (free_args(args), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-		array[i] = nb;
+			return (free_args(args), ft_putstr_fd(NUMBER_ERR, 2), 1);
+		if (i == 0)
+			color->x = (float)nb / 255.0;
+		else if (i == 1)
+			color->y = (float)nb / 255.0;
+		else
+			color->z = (float)nb / 255.0;
 	}
 	free_args(args);
 	return (0);
 }
 
-
-
-int	init_float_array(char *str, float *array, int flag)
+int	init_float_array(char *str, t_vec3 *vector, int flag)
 {
 	int		i;
 	int		len;
@@ -189,436 +203,25 @@ int	init_float_array(char *str, float *array, int flag)
 		str[len - 1] = ' ';
 	args = ft_split(str, ',');
 	if (!args)
-		return (ft_putstr_fd("-error: Malloc Failure\n", 2), 1);
+		return (ft_putstr_fd(MALLOC_ERR, 2), 1);
 	if (argv_size(args) != 3)
-		return (free_args(args), ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
+		return (free_args(args), ft_putstr_fd(QUANTITY_ERR, 2), 1);
 	i = -1;
 	while (args[++i])
 	{
 		nb = ft_atolf(args[i]);
 		if (!is_valid_float(args[i], nb) || (flag && (nb < -1.0 || nb > 1.0)))
-			return (free_args(args), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-		array[i] = nb;
+			return (free_args(args), ft_putstr_fd(NUMBER_ERR, 2), 1);
+		if (i == 0)
+			vector->x = nb;
+		else if (i == 1)
+			vector->y = nb;
+		else
+			vector->z = nb;
 	}
 	free_args(args);
 	return (0);
 }
-
-
-int	init_camera(t_program *data, char **args)
-{
-//	int		i;
-	int		nb;
-//	double	num;
-//	char	**nums;
-
-//	printf("camera\n");
-	if (argv_size(args) != 4)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-
-	// NEW
-	if (init_float_array(args[1], data->camera.coords, 0))
-		return (1);
-	if (init_float_array(args[2], data->camera.vector, 1))
-		return (1);
-
-	
-// 	i = -1;
-// 	nums = ft_split(args[1], ',');
-// 	if (argv_size(nums) != 3)
-// 		return (free_args(nums), ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-// 	if (!nums)
-// 		return (1);
-// 	while (nums[++i])
-// 	{
-// 		nb = ft_atolf(nums[i]);
-// 		if (!is_valid_float(nums[i], nb))
-// 			return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-// 		data->camera.coords[i] = nb;
-// 	}
-// 	free_args(nums);
-
-	
-// 	i = -1;
-// 	nums = ft_split(args[2], ',');
-// //	printf("%d\n", argv_size(nums));
-// 	if (argv_size(nums) != 3)
-// 		return (free_args(nums), ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-// 	if (!nums)
-// 		return (1);
-// 	while (nums[++i])
-// 	{
-// 		nb = ft_atolf(nums[i]);
-// 		if (!is_valid_float(nums[i], nb) || nb < -1.0 || nb > 1.0)
-// 			return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-// 		data->camera.norm_vector[i] = nb;
-// 	}
-// 	free_args(nums);
-
-	
-
-	
-	nb = ft_atoi(args[3]);
-	if (!is_valid_int(args[3]) || nb < 0 || nb > 180)
-		return (ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	else
-		data->camera.fov = nb;
-	return (0);
-
-
-
-	
-	/*
-	data->camera.coords[0] = 0;
-	data->camera.coords[1] = 0;
-	data->camera.coords[2] = 0;
-	data->camera.norm_vector[0] = 0;
-	data->camera.norm_vector[1] = 0;
-	data->camera.norm_vector[2] = 0;
-	data->camera.fov = 0; // [0, 180]
-	*/
-}
-
-int	init_light(t_program *data, char **args)
-{
-//	int		i;
-//	int		nb;
-	double	nb;
-//	char	**nums;
-
-//	printf("light\n");
-	if (argv_size(args) != 4)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), 1);
-
-
-	// NEW	
-	if (init_float_array(args[1], data->light.coords, 0))
-		return (1);
-		
-	// i = -1;
-	// nums = ft_split(args[1], ',');
-	// if (!nums)
-	// 	return (1);
-	// while (nums[++i])
-	// {
-	// 	nb = ft_atolf(nums[i]);
-	// 	if (!is_valid_float(nums[i], nb))
-	// 		return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	// 	data->light.coords[i] = nb;
-	// }
-	// free_args(nums);
-
-	
-	// i = -1;
-	// nums = ft_split(args[3], ',');
-	// if (!nums)
-	// 	return (1);
-	// while (nums[++i])
-	// {
-	// 	nb = ft_atoi(nums[i]);
-	// 	if (!is_valid_int(nums[i]) || nb < 0 || nb > 255)
-	// 		return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	// 	data->light.color[i] = nb;
-	// }
-	// free_args(nums);
-
-	
-	nb = ft_atolf(args[2]);
-	if (!is_valid_float(args[2], nb) || nb < 0.0 || nb > 1.0)
-		return (ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	else
-		data->light.brigthness = nb;
-	
-	if (init_int_array(args[3], data->light.rgb))
-		return (1);
-
-	return (0);
-	/*
-	data->light.coords[0] = 0;
-	data->light.coords[1] = 0;
-	data->light.coords[2] = 0;
-	data->light.brightness = 0;
-	data->light.color[0] = 0;
-	data->light.color[1] = 0;
-	data->light.color[2] = 0;
-	*/
-}
-
-
-// // IN CASE OF INVALID DATA, RETURN NULL
-t_types	*init_sphere(char **args)
-{
-//	int			i;
-//	int			nb;
-	double		nb;
-	t_sphere	*node;
-//	char		**nums;
-
-//	printf("sphere\n");
-	if (argv_size(args) != 4)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), NULL);
-	node = malloc(sizeof(t_sphere));
-	if (!node)
-		return (NULL);
-	node->type = 's';
-	node->next = NULL;
-
-
-	// NEW
-	if (init_float_array(args[1], node->coords, 0))
-		return (free(node), NULL);
-	
-		
-	// // Coords
-	// i = -1;
-	// nums = ft_split(args[1], ',');
-	// if (!nums)
-	// 	return (NULL);
-	// while (nums[++i])
-	// {
-	// 	num = ft_atolf(nums[i]);
-	// 	if (!is_valid_float(nums[i], num))
-	// 		return (free_args(nums), free(node), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-	// 	node->coords[i] = num;
-	// }
-	// free_args(nums);
-
-	
-	// Radius
-	nb = ft_atolf(args[2]);
-	if (!is_valid_float(args[2], nb))
-		return (ft_putstr_fd("-error: Invalid Numeric arguments 4\n", 2), NULL);
-	else
-		node->radius = nb;
-
-
-	// rgb new
-	if (init_int_array(args[3], node->rgb))
-		return (free(node), NULL);
-
-
-	/*
-	// rgb OLD
-	i = -1;
-	nums = ft_split(args[3], ',');
-	if (!nums)
-		return (NULL);
-	while (nums[++i])
-	{
-		nb = ft_atoi(nums[i]);
-		if (!is_valid_int(nums[i]) || nb < 0 || nb > 255)
-			return (free_args(nums), free(node), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-		node->rgb[i] = nb;
-	}
-	free_args(nums);
-	*/
-
-	
-	return ((t_types *)node);
-	/*
-		coords
-		diamenter
-		color		[0,255] xyz
-	*/
-}
-
-t_types	*init_cylinder(char **args)
-{
-//	int			i;
-//	int			nb;
-	double		nb;
-	t_cylinder	*node;
-//	char		**nums;
-
-//	printf("cylinder\n");
-	if (argv_size(args) != 6)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), NULL);
-	node = malloc(sizeof(t_cylinder));
-	if (!node)
-		return (NULL);
-	node->type = 'y';
-	node->next = NULL;
-
-	// NEW
-	if (init_float_array(args[1], node->coords, 0))
-		return (free(node), NULL);
-
-		
-	// // Coords
-	// i = -1;
-	// printf("\n\n%s\n\n", args[1]);
-	// nums = ft_split(args[1], ',');
-	// if (!nums)
-	// 	return (NULL);
-	// while (nums[++i])
-	// {
-	// 	num = ft_atolf(nums[i]);
-	// 	if (!is_valid_float(nums[i], num))
-	// 		return (free_args(nums), free(node), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-	// 	node->coords[i] = num;
-	// }
-	// free_args(nums);
-
-	// NEW
-	if (init_float_array(args[2], node->vector, 1))
-		return (free(node), NULL);
-
-	// // Vector
-	// i = -1;
-	// printf("\n\n%s\n\n", args[2]);
-	// nums = ft_split(args[2], ',');
-	// if (!nums)
-	// 	return (NULL);
-	// while (nums[++i])
-	// {
-	// 	printf("nums index %i: %s\n", i, nums[i]);
-	// 	num = ft_atolf(nums[i]);
-	// 	if (!is_valid_float(nums[i], num) || num < -1.0 || num > 1.0)
-	// 		return (free_args(nums), free(node), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-	// 	node->vector[i] = num;
-	// }
-	// free_args(nums);
-
-	// Radius
-	nb = ft_atolf(args[3]);
-	if (!is_valid_float(args[3], nb))
-		return (ft_putstr_fd("-error: Invalid Numeric arguments 5\n", 2), NULL);
-	else
-		node->radius = nb;
-
-	// Height
-	nb = ft_atolf(args[4]);
-	if (!is_valid_float(args[4], nb))
-		return (ft_putstr_fd("-error: Invalid Numeric arguments 6\n", 2), NULL);
-	else
-		node->height = nb;
-
-
-
-	// rgb NEW
-	if (init_int_array(args[5], node->rgb))
-		return (free(node), NULL);		
-	
-	/*
-	// rgb OLD
-	i = -1;
-	nums = ft_split(args[5], ',');
-	if (!nums)
-		return (NULL);
-	while (nums[++i])
-	{
-		nb = ft_atoi(nums[i]);
-		if (!is_valid_int(nums[i]) || nb < 0 || nb > 255)
-			return (free_args(nums), free(node), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-		node->rgb[i] = nb;
-	}
-	free_args(nums);
-	*/
-	return ((t_types *)node);
-
-
-
-
-
-	/*
-		coords
-		norm_vector [-1,1] xyz
-		diameter
-		height
-		color		[0,255] xyz
-	*/
-}
-
-
-
-t_types	*init_plane(char **args)
-{
-	t_plane	*node;
-
-	if (argv_size(args) != 4)
-		return (ft_putstr_fd("-error: Missing or Extra arguments\n", 2), NULL);
-	node = malloc(sizeof(t_plane));
-	if (!node)
-		return (NULL);
-	node->type = 'p';
-	node->next = NULL;	
-
-
-	if (init_float_array(args[1], node->coords, 0))
-		return (free(node), NULL);
-
-	// NEW
-	if (init_float_array(args[2], node->vector, 1))
-		return (free(node), NULL);
-
-
-	// rgb NEW
-	if (init_int_array(args[3], node->rgb))
-		return (free(node), NULL);		
-	
-	return ((t_types *)node);
-	
-
-		// int			i;
-	// int			nb;
-	// double		num;
-	// t_sphere	*node;
-	// char		**nums;
-
-	// (void)args;
-	// node = malloc(sizeof(t_sphere));
-	// if (!node)
-	// 	return (NULL);
-	// node->type = 's';
-	// node->next = NULL;
-
-	// // Coords
-	// i = -1;
-	// nums = ft_split(args[1], ',');
-	// if (!nums)
-	// 	return (1);
-	// while (nums[++i])
-	// {
-	// 	nb = ft_atolf(nums[i]);
-	// 	if (!is_valid_float(nums[i], nb))
-	// 		return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	// 	node->coords[i] = nb;
-	// }
-	// free_args(nums);
-
-	
-	// // Radius
-	// num = ft_atolf(args[2]);
-	// if (!is_valid_float(args[2], num) || num < 0.0 || num > 1.0)
-	// 	return (ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), NULL);
-	// else
-	// 	node->radius = num;
-
-
-	// // rgb
-	// i = -1;
-	// nums = ft_split(args[2], ',');
-	// if (!nums)
-	// 	return (1);
-	// while (nums[++i])
-	// {
-	// 	nb = ft_atoi(nums[i]);
-	// 	if (!is_valid_int(nums[i]) || num < 0 || num > 255)
-	// 		return (free_args(nums), ft_putstr_fd("-error: Invalid Numeric arguments\n", 2), 1);
-	// 	node->rgb[i] = nb;
-	// }
-	// free_args(nums);
-	
-	/*
-		coords
-		norm_vector	[-1,1] xyz
-		color		[0,255] xyz
-	*/
-}
-
-
-
-// DONE
 
 int	argv_size(char **argv)
 {
@@ -639,8 +242,8 @@ int	is_valid_float(char *str, double nb)
 	i = 0;
 	sign = 0;
 	point = 0;
-	(void)nb;
-	// The check below doesnt work, why?
+	(void)nb; // Remove if the check below works
+//	The check below doesnt work, why?
 	// if (nb < FLT_MIN || nb > FLT_MAX)
 	// {
 	// 	printf("%lf, %f\n", nb, FLT_MIN);
@@ -677,11 +280,10 @@ int	is_valid_int(char *str)
 	return (1);
 }
 
-
 int	not_whitespaces(char *str)
 {
 	int	i;
-	
+
 	i = 0;
 	if (!str)
 		return (0);
@@ -710,17 +312,17 @@ int	check_args(int argc, char **argv, int *fd)
 {
 	if (argc == 1)
 	{
-		ft_putstr_fd("-error: Missing file argument\n",2);
+		ft_putstr_fd(FILE_ERR, 2);
 		return (1);
 	}
 	if (argc > 2)
 	{
-		ft_putstr_fd("-error: Too many arguments\n",2);
+		ft_putstr_fd(ARGV_ERR, 2);
 		return (1);
-	}	
+	}
 	if (check_extenssion(argv[1]))
 	{
-		ft_putstr_fd("-error: Wrong extension\n",2);
+		ft_putstr_fd(EXTENSION_ERR, 2);
 		return (1);
 	}
 	*fd = open(argv[1], O_RDONLY);
@@ -760,6 +362,7 @@ void	free_args(char **argv)
 	free(argv);
 }
 
+// --- LIST UTILS ---
 void	ft_lstclear(t_types *lst)
 {
 	t_types	*ptr;
@@ -771,4 +374,110 @@ void	ft_lstclear(t_types *lst)
 		free(lst);
 		lst = ptr;
 	}
+}
+
+void	ft_lstadd_back(t_types **lst, t_types *node)
+{
+	t_types	*last;
+
+	if (!lst)
+		return ;
+	if (!*lst)
+		*lst = node;
+	else
+	{
+		last = *lst;
+		while (last->next)
+			last = last->next;
+		last->next = node;
+	}
+}
+
+// --- INIT NODES ---
+t_types	*initialize_node(char **args)
+{
+	if (!args)
+		return (NULL);
+	else if (ft_strcmp(args[0], "sp") == 0)
+		return (init_sphere(args));
+	else if (ft_strcmp(args[0], "pl") == 0)
+		return (init_plane(args));
+	else if (ft_strcmp(args[0], "cy") == 0)
+		return (init_cylinder(args));
+	else
+		return (ft_putstr_fd(INVALID_ERR, 2), NULL);
+}
+
+// IN CASE OF INVALID DATA, RETURN NULL
+t_types	*init_sphere(char **args)
+{
+	double		nb;
+	t_sphere	*node;
+
+	if (argv_size(args) != 4)
+		return (ft_putstr_fd(QUANTITY_ERR, 2), NULL);
+	node = malloc(sizeof(t_sphere));
+	if (!node)
+		return (NULL);
+	node->type = 's';
+	node->next = NULL;
+	if (init_float_array(args[1], &node->coords, 0))
+		return (free(node), NULL);
+	nb = ft_atolf(args[2]);
+	if (!is_valid_float(args[2], nb))
+		return (ft_putstr_fd(NUMBER_ERR, 2), NULL);
+	else
+		node->radius = nb;
+	if (init_int_array(args[3], &node->color))
+		return (free(node), NULL);
+	return ((t_types *)node);
+}
+
+t_types	*init_cylinder(char **args)
+{
+	double		nb;
+	t_cylinder	*node;
+
+	if (argv_size(args) != 6)
+		return (ft_putstr_fd(QUANTITY_ERR, 2), NULL);
+	node = malloc(sizeof(t_cylinder));
+	if (!node)
+		return (NULL);
+	node->type = 'y';
+	node->next = NULL;
+	if (init_float_array(args[1], &node->coords, 0)
+		|| init_float_array(args[2], &node->vector, 1)
+		|| init_int_array(args[5], &node->color))
+		return (free(node), NULL);
+	nb = ft_atolf(args[3]);
+	if (!is_valid_float(args[3], nb))
+		return (ft_putstr_fd(NUMBER_ERR, 2), NULL);
+	else
+		node->radius = nb;
+	nb = ft_atolf(args[4]);
+	if (!is_valid_float(args[4], nb))
+		return (ft_putstr_fd(NUMBER_ERR, 2), NULL);
+	else
+		node->height = nb;
+	return ((t_types *)node);
+}
+
+t_types	*init_plane(char **args)
+{
+	t_plane	*node;
+
+	if (argv_size(args) != 4)
+		return (ft_putstr_fd(QUANTITY_ERR, 2), NULL);
+	node = malloc(sizeof(t_plane));
+	if (!node)
+		return (NULL);
+	node->type = 'p';
+	node->next = NULL;
+	if (init_float_array(args[1], &node->coords, 0))
+		return (free(node), NULL);
+	if (init_float_array(args[2], &node->vector, 1))
+		return (free(node), NULL);
+	if (init_int_array(args[3], &node->color))
+		return (free(node), NULL);
+	return ((t_types *)node);
 }
