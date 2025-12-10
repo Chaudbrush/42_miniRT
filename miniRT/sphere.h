@@ -6,7 +6,7 @@
 /*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/10 11:00:44 by zali             ###   ########.fr       */
+/*   Updated: 2025/12/10 13:51:22 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,7 +199,7 @@ int to_rgb(t_vec3 c);
 
 int	rt(t_program *data, t_vec3 vec);
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light);
-int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light);
+int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light);
 
 // Vector Functions
 t_vec3	normalize_vector(t_vec3 vector);

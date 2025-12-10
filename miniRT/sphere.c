@@ -6,7 +6,7 @@
 /*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/10 11:54:13 by zali             ###   ########.fr       */
+/*   Updated: 2025/12/10 13:54:24 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,84 +81,107 @@ int	rt(t_program *data, t_vec3 vec)
 			if (color != -1)
 				return (color);
 		}
-/*
-	if (object->type == 'y')
-	{
-		t_cylinder *cyl = (t_cylinder *) object;
-		return raytrace_cylinder(vec, cyl->coords, data->light.coords);
-	}
-*/
+		if (object->type == 'y')
+		{
+			t_cylinder *cyl = (t_cylinder *) object;
+			int color = raytrace_cylinder(vec, cyl, data->light.coords);
+			if (color != -1)
+				return (color);
+		}
 		object = object->next;
 	}
 	//return (0xFFFFFFFF);
 	return 0;
 }
-
-int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
+int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 {
-	(void) light;
-    float radius = 0.5;
-   // float height = 1.0f;
+	t_vec3 origin = cyl->coords;
+    float radius = cyl->radius;
+    float height = cyl->height;
+	t_vec3 ray_origin = {0,0,0};
 
-    t_vec3 ray_origin = (t_vec3){0,0,0};
+	t_vec3 oc = { ray_origin.x - origin.x, ray_origin.y - origin.y, ray_origin.z - origin.z };
+    // Cylinder aligned along Y-axis now
+    float a = dir.x * dir.x + dir.z * dir.z;
+    float b = 2.0 * (oc.x * dir.x + oc.z * dir.z);
+    float c = oc.x * oc.x + oc.z * oc.z - radius * radius;
 
-    // Convert ray origin to cylinder local space:
-    t_vec3 oc = vec_sub(ray_origin, origin);
+    float discriminant = b*b - 4*a*c;
+    if (discriminant < 0.0)
+        return -1; // no hit
 
-    float a = dir.x*dir.x + dir.z*dir.z;
-    float b = 2 * (oc.x*dir.x + oc.z*dir.z);
-    float c = oc.x*oc.x + oc.z*oc.z - radius*radius;
+    float sqrtD = sqrt(discriminant);
+    float t1 = (-b - sqrtD) / (2*a);
+    float t2 = (-b + sqrtD) / (2*a);
 
-    float disc = b*b - 4*a*c;
-    if (disc < 0) return 0;
+	float t = (t1 > 0) ? t1 : t2;
+    if (t < 0) return -1;
 
-    float sq = sqrtf(disc);
-    float t1 = (-b - sq) / (2*a);
-    float t2 = (-b + sq) / (2*a);
-	if (t1 || t2)	return (0xFFFF0000);
-	return 0;
-	/*
-    float half = height/2;
-    float t = -1;
 
-    // Check t1
-    float y1 = oc.y + t1*dir.y;
-    if (t1 >= 0 && y1 >= -half && y1 <= half)
-        t = t1;
 
-    // Check t2
-    float y2 = oc.y + t2*dir.y;
-    if (t2 >= 0 && y2 >= -half && y2 <= half)
-        if (t < 0 || t2 < t) t = t2;
+	t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
-    if (t < 0)
-        return 0;
+    // Normal at hitpoint
+    t_vec3 normal = { hit.x - origin.x, hit.y - origin.y, hit.z - origin.z };
+    float nl = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
+    normal.x /= nl; normal.y /= nl; normal.z /= nl;
 
-    // Hit point in world:
-    t_vec3 hit = vec_add(ray_origin, vec_scale(dir, t));
-
-    t_vec3 p = vec_sub(hit, origin); 
-
-    t_vec3 normal = { p.x, 0, p.z };
-
-    float nl = sqrt(normal.x*normal.x + normal.z*normal.z);
-    normal.x /= nl;
-    normal.z /= nl;
-
-    float ll = sqrt(light.x*light.x + light.y*light.y + light.z*light.z);
+    // Normalize light
+    float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
     t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
 
-    float lf = normal.x*(-L.x) + normal.y*(-L.y) + normal.z*(-L.z);
-    if (lf < 0) lf = 0;
+    // Diffuse
+    float diffuse = - (normal.x*L.x + normal.y*L.y + normal.z*L.z);
+    if (diffuse < 0) diffuse = 0;
 
-    int base = 0xFF0000;
+    // Specular
+    t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
+    float vl = sqrtf(view.x*view.x + view.y*view.y + view.z*view.z);
+    view.x /= vl; view.y /= vl; view.z /= vl;
 
-    float r = ((base>>16)&0xFF)/255.0f * lf;
-    float g = ((base>>8 )&0xFF)/255.0f * lf;
-    float b2= ((base    )&0xFF)/255.0f * lf;
+    // reflect(L, N) = L - 2*dot(L,N)*N
+    float dotLN = L.x*normal.x + L.y*normal.y + L.z*normal.z;
+    t_vec3 reflect = { L.x - 2*dotLN*normal.x, L.y - 2*dotLN*normal.y, L.z - 2*dotLN*normal.z };
 
-    return ((int)(r*255)<<16) | ((int)(g*255)<<8) | (int)(b2*255);
-*/
+    float spec = reflect.x*view.x + reflect.y*view.y + reflect.z*view.z;
+    if (spec < 0) spec = 0;
+    float shininess = 50.0f;
+    spec = powf(spec, shininess);
+    float spec_strength = 0.5f;
+	float r = cyl->color.x;
+	float g = cyl->color.y;
+	b = cyl->color.z;
+
+    // Apply diffuse
+    r *= diffuse; g *= diffuse; b *= diffuse;
+
+    // Add specular (white)
+    r += spec_strength*spec;
+    g += spec_strength*spec;
+    b += spec_strength*spec;
+
+    // Check both intersections
+    float y1 = oc.y + t1 * dir.y;
+    float y2 = oc.y + t2 * dir.y;
+
+    // Cylinder extends from -height/2 to +height/2 along Y
+    float half = height / 2.0;
+    int yax = 0; // default: no hit
+    if (y1 >= -half && y1 <= half)
+        yax = 1;
+    else if (y2 >= -half && y2 <= half)
+        yax = 1;
+
+    if (yax)
+	{
+		if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
+	    int ir = (int)(r*255);
+	    int ig = (int)(g*255);
+	    int ib = (int)(b*255);
+
+	    return (ir<<16)|(ig<<8)|ib;
+	}
+    return -1;
 }
 
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light)
