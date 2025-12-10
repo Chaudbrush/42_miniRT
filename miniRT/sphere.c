@@ -6,7 +6,7 @@
 /*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/10 13:54:24 by zali             ###   ########.fr       */
+/*   Updated: 2025/12/10 14:38:43y zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,37 @@ int	render(t_program *data)
 	return (0);
 }
 
+int closest_vec(int *colors, t_vec3 **vecs, int total, t_vec3 camera)
+{
+	float	tdist;
+	float	dist;
+	int		smallest_idx;
+	int		i;
+	t_vec3	*vec;
+	i = 0;
+	dist = 99999;
+	smallest_idx = 0;
+	while (i < total)
+	{
+		if (colors[i] == -1)
+		{
+			i++;
+			continue ;
+		}
+		vec = vecs[i];
+		tdist = sqrt(((camera.x - vec->x)*(camera.x - vec->x)) + ((camera.y + vec->y)*(camera.y + vec->y)) + ((camera.x - vec->z)*(camera.x - vec->z)));
+		if (tdist < dist)
+		{
+			dist = tdist;
+			smallest_idx = i;
+		}
+		i++;
+	}
+	if (colors[smallest_idx] == -1)
+		return (0);
+	return (colors[smallest_idx]);
+}
+
 void	my_pixel_put(t_img *img, int x, int y, int color)
 {
 	char	*pixel;
@@ -70,28 +101,30 @@ int	rt(t_program *data, t_vec3 vec)
 {
 	//t_vec3	origin_cylinder = {1, 0, -2};
 	//t_vec3	origin_sphere = {0, 0, -1};
-	t_types *object;
+	t_types	*object;
+	int		i;
+	int		colors[5];
+	t_vec3	*vecs[5];
+
+	i = 0;
 	object = data->objects;
 	while (object)
-	{
-		if (object->type == 's')
-		{
-			t_sphere *sphere = (t_sphere *)object;
-			int color = raytrace_sphere(vec, sphere, data->light.coords);
-			if (color != -1)
-				return (color);
-		}
+	{	
 		if (object->type == 'y')
 		{
-			t_cylinder *cyl = (t_cylinder *) object;
-			int color = raytrace_cylinder(vec, cyl, data->light.coords);
-			if (color != -1)
-				return (color);
+			colors[i] = raytrace_cylinder(vec, (t_cylinder *)object, data->light.coords);
+			vecs[i] = &(((t_cylinder *)object)->coords);
+
 		}
+		else if (object->type == 's')
+		{
+			colors[i] = raytrace_sphere(vec, (t_sphere *)object, data->light.coords);
+			vecs[i] = &(((t_cylinder *)object)->coords); 
+		}
+		i++;
 		object = object->next;
 	}
-	//return (0xFFFFFFFF);
-	return 0;
+	return (closest_vec(colors, vecs, --i, data->camera.coords)); 
 }
 int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 {
@@ -174,6 +207,7 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 
     if (yax)
 	{
+		return (0xFFFF0000);
 		if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
 	    int ir = (int)(r*255);
 	    int ig = (int)(g*255);
