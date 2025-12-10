@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sphere.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/10 13:51:22 by zali             ###   ########.fr       */
+/*   Updated: 2025/12/10 15:29:24 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,7 @@ int to_rgb(t_vec3 c);
 int	rt(t_program *data, t_vec3 vec);
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light);
 int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light);
+int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light);
 
 // Vector Functions
 t_vec3	normalize_vector(t_vec3 vector);
@@ -207,5 +208,6 @@ t_vec3	vec_add(t_vec3 vec1, t_vec3 vec2);
 t_vec3	vec_sub(t_vec3 vec1, t_vec3 vec2);
 t_vec3	vec_scale(t_vec3 vector, float s);
 t_vec3	vec_mult(t_vec3 vec1, t_vec3 vec2);
+float	dot_product(t_vec3 v1, t_vec3 v2);
 
 #endif

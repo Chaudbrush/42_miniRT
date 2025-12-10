@@ -121,6 +121,11 @@ int	rt(t_program *data, t_vec3 vec)
 			colors[i] = raytrace_sphere(vec, (t_sphere *)object, data->light.coords);
 			vecs[i] = &(((t_cylinder *)object)->coords); 
 		}
+		if (object->type == 'p')
+		{
+			colors[i] = raytrace_plane(vec, (t_plane *)object, data->light.coords);
+			vecs[i] = &(((t_plane *)object)->coords); 
+		}
 		i++;
 		object = object->next;
 	}
@@ -216,6 +221,91 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 	    return (ir<<16)|(ig<<8)|ib;
 	}
     return -1;
+}
+
+int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light)
+{
+	
+	/*
+	Definition:
+	
+	C is a point that lies on the plane
+	V is the plane normal (unit length)
+
+	To hit a plane we notice that:
+
+		(P-C)|V = 0
+
+	This means that the P-C vector is perpendicular to the normal, which is true when the point P lies on the plane.
+
+	Solution:
+
+		(D*t+X)|V = 0
+		D|V*t = -X|V
+		t = -X|V / D|V
+
+	Before the division we should check whether D|V is nonzero. We can also check if the signs of D|V and X|V are different (if not, resulting t will be negative).
+
+	Surface normal vector at point P equals to the plane normal, unless D|V is negative, in which case N=-V. 
+	
+	
+	X:O - C - where O is the ray origin, C is the center of the shape we hit
+	V: the plane normal
+	D: ray direction
+
+	C = origin;
+	V = data->
+	
+	D = dir;
+	0 = ray_origin;
+
+
+
+	A plane is characterized by a point p0, indicating its distance from the world's origin, and a normal , which defines the plane's orientation.
+	We can derive a vector on the plane from any point p on it by subtracting p0 from p.
+	Since this resultant vector lies within the plane, it is perpendicular to the plane's normal.
+	Leveraging the property that the dot product of two perpendicular vectors equals 0, we have (equation 1):
+
+	(p - p0) * n = 0
+
+	Likewise, a ray is described using the parametric form (equation 2):
+
+	l0 + l * t = p
+
+	l0 = ray origin
+	l = ray direction
+	t = ray distance to point
+
+	Subestituting we get:
+
+	((l0 + l * t) - p0) * n = 0
+
+	So:
+
+	t = ((p0 - l0) * n) / l * n
+
+	It's worth noting that if the plane and ray are parallel (i.e., when approaches 0), they either perfectly coincide, offering an infinite number of solutions, or they do not intersect at all.
+	In practical C++ implementations, we typically return false (indicating no intersection) when the denominator is less than a very small threshold.
+
+	*/
+
+	float	t;
+	float	denominator;
+	t_vec3	sub;
+	t_vec3 ray_origin = {0,0,0};
+	
+	(void)light;
+	sub = vec_sub(plane->coords, ray_origin);
+	denominator = dot_product(plane->vector, dir);
+//	printf("denom: %f\n", denominator);
+	if (denominator > 1e-6)
+	{
+		t = (dot_product(sub, plane->vector)) / denominator;
+//		printf("t: %f\n", t);
+		if (t >= 0)
+			return (0xFFFF00FF);
+	}
+	return (0);
 }
 
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light)
@@ -341,6 +431,11 @@ t_vec3	vec_sub(t_vec3 vec1, t_vec3 vec2)
 t_vec3 vec_scale(t_vec3 vector, float s)
 {
     return ((t_vec3){vector.x * s, vector.y * s, vector.z * s});
+}
+
+float	dot_product(t_vec3 v1, t_vec3 v2)
+{
+	return (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
 }
 
 int to_rgb(t_vec3 c)
