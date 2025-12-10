@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sphere.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/05 13:31:48 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/10 11:54:13 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,51 +68,37 @@ void	my_pixel_put(t_img *img, int x, int y, int color)
 
 int	rt(t_program *data, t_vec3 vec)
 {
-	t_vec3	origin_cylinder = {1, 0, -2};
-	t_vec3	origin_sphere = {0, 0, -1};
-	
-	// We need to iterate over the whole list here, checking for the forms, and rendering them when found
-	int sphere_col = raytrace_sphere(vec, origin_sphere, data->light.coords);
-	int cylinder_col = raytrace_cylinder(vec, origin_cylinder, data->light.coords);
-	if (sphere_col && !cylinder_col)
-		return (sphere_col);
-	if (cylinder_col && !sphere_col)
-		return (cylinder_col);
-	if (sphere_col && cylinder_col)
+	//t_vec3	origin_cylinder = {1, 0, -2};
+	//t_vec3	origin_sphere = {0, 0, -1};
+	t_types *object;
+	object = data->objects;
+	while (object)
 	{
-		if (origin_cylinder.z < origin_sphere.z)
-			return (cylinder_col);
-		else
-			return (sphere_col);
+		if (object->type == 's')
+		{
+			t_sphere *sphere = (t_sphere *)object;
+			int color = raytrace_sphere(vec, sphere, data->light.coords);
+			if (color != -1)
+				return (color);
+		}
+/*
+	if (object->type == 'y')
+	{
+		t_cylinder *cyl = (t_cylinder *) object;
+		return raytrace_cylinder(vec, cyl->coords, data->light.coords);
 	}
-	return (0x001f1f1f);
+*/
+		object = object->next;
+	}
+	//return (0xFFFFFFFF);
+	return 0;
 }
-
-// int	rt(t_program *data, t_vec3 vec)
-// {
-// 	t_vec3	origin_plane = {0, 1, -1};
-	
-// 	int	plane_col = raytrace_place(vec, origin_plane, data->light.coords);
-
-// 	if (plane_col)
-// 		return (plane_col);
-// 	return (0x001f1f1f);
-// }
-
-
-// int	raytrace_plane(t_vec3 dir, t_vec3 origin, t_vec3 light)
-// {
-	
-	
-
-	
-// }
-
 
 int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
 {
+	(void) light;
     float radius = 0.5;
-    float height = 1.0f;
+   // float height = 1.0f;
 
     t_vec3 ray_origin = (t_vec3){0,0,0};
 
@@ -129,9 +115,10 @@ int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
     float sq = sqrtf(disc);
     float t1 = (-b - sq) / (2*a);
     float t2 = (-b + sq) / (2*a);
-
+	if (t1 || t2)	return (0xFFFF0000);
+	return 0;
+	/*
     float half = height/2;
-
     float t = -1;
 
     // Check t1
@@ -150,8 +137,7 @@ int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
     // Hit point in world:
     t_vec3 hit = vec_add(ray_origin, vec_scale(dir, t));
 
-    // Now compute normal in cylinder local space:
-    t_vec3 p = vec_sub(hit, origin); // convert to local cylinder coords
+    t_vec3 p = vec_sub(hit, origin); 
 
     t_vec3 normal = { p.x, 0, p.z };
 
@@ -159,14 +145,12 @@ int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
     normal.x /= nl;
     normal.z /= nl;
 
-    // Light
     float ll = sqrt(light.x*light.x + light.y*light.y + light.z*light.z);
     t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
 
     float lf = normal.x*(-L.x) + normal.y*(-L.y) + normal.z*(-L.z);
     if (lf < 0) lf = 0;
 
-    // Base color (red)
     int base = 0xFF0000;
 
     float r = ((base>>16)&0xFF)/255.0f * lf;
@@ -174,15 +158,15 @@ int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light)
     float b2= ((base    )&0xFF)/255.0f * lf;
 
     return ((int)(r*255)<<16) | ((int)(g*255)<<8) | (int)(b2*255);
+*/
 }
 
-int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light)
+int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light)
 {
-    // Camera at origin
+	t_vec3 center = sphere->coords;
+	float radius = sphere->radius;
     t_vec3 ray_origin = {0,0,0};
 
-    // Sphere radius
-    float radius = 0.5f;
 
     // Quadratic coefficients
     t_vec3 oc = { ray_origin.x - center.x, ray_origin.y - center.y, ray_origin.z - center.z };
@@ -191,7 +175,7 @@ int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light)
     float c = oc.x*oc.x + oc.y*oc.y + oc.z*oc.z - radius*radius;
 
     float disc = b*b - 4*a*c;
-    if (disc < 0.0f) return 0x000000; // no hit
+    if (disc < 0.0f) return -1; // no hit
 
     float sqrtD = sqrtf(disc);
     float t0 = (-b - sqrtD) / (2*a);
@@ -199,7 +183,7 @@ int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light)
 
     // Pick nearest positive intersection
     float t = (t0 > 0) ? t0 : t1;
-    if (t < 0) return 0x000000;
+    if (t < 0) return 0xFFFF0000;
 
     // Hitpoint
     t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
@@ -232,11 +216,9 @@ int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light)
     spec = powf(spec, shininess);
     float spec_strength = 0.5f;
 
-    // Base color
-    int base = 0xFF5500;
-    float r = ((base>>16)&0xFF)/255.0f;
-    float g = ((base>>8 )&0xFF)/255.0f;
-    b = ((base    )&0xFF)/255.0f;
+	float r = sphere->color.x;
+	float g = sphere->color.y;
+	b = sphere->color.z;
 
     // Apply diffuse
     r *= diffuse; g *= diffuse; b *= diffuse;
@@ -256,56 +238,9 @@ int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light)
 
     return (ir<<16)|(ig<<8)|ib;
 }
-
-// int	render_circle(t_program *data, double column, double row)
-// {
-// 	double	circle_cords[3] = {0.0, 0.0, 0.0};
-// 	double	ray_direction[3] = {column, row, -1.0};
-// 	double	ray_origin[3] = {0.0, 0.0, 2.0};
-// 	double	radius = 0.5;
-
-// 	(void)data;
-
-// 	float b_correction = -2.0 * (ray_direction[0] * circle_cords[0] - ray_direction[1] * circle_cords[1] - ray_direction[2] * circle_cords[2]);
-// 	float c_correction = -1.0 * (pow(circle_cords[0], 2) + pow(circle_cords[1], 2) + pow(circle_cords[0], 2)) - 2 * (ray_origin[0] * circle_cords[0] - ray_origin[1] * circle_cords[1] - ray_origin[2] * circle_cords[2]);
-
-// 	b_correction = 0;
-// 	c_correction = 0;
-	
-// 	float a = pow(ray_direction[0], 2) + pow(ray_direction[1], 2) + pow(ray_direction[2], 2);
-// 	float b = 2.0 * (ray_direction[0] * ray_origin[0] + ray_direction[1] * ray_origin[1] + ray_direction[2] * ray_origin[2]) + b_correction;
-// 	float c = pow(ray_origin[0], 2) + pow(ray_origin[1], 2) + pow(ray_origin[2], 2) - pow(radius, 2) + c_correction;
-
-
-	
-// 	float discriminant = (b * b) - (4 * a * c);
-
-// //	printf("%lf\n", discriminant);
-// 	if (discriminant < 0.0f)
-// 		return (0x001f1f1f);
-// 	else
-// 	{
-// 		float	t = (-b - sqrt(discriminant) / 2.0f * a);
-
-// 		t_vec3	color_vec;
-// 		color_vec.x = ray_origin[0] + ray_direction[0] * t;
-// 		color_vec.y = ray_origin[1] + ray_direction[1] * t;
-// 		color_vec.z = ray_origin[2] + ray_direction[2] * t;
-// 		unsigned int color = to_rgb(color_vec);
-// 		return (color);
-
-
-// 	}
-// //	return ((t_vec3){255.0, 1.0, 12.4});
-// //		return (0x00333333);
-	
-// }
-
-
 // VECTOR FUNCTIONS
 t_vec3	normalize_vector(t_vec3 vector)
 {
-	// To normalize a vector, you divide each coordinate by it's len
 	float	len;
 	t_vec3	new;
 
@@ -351,20 +286,6 @@ t_vec3 vec_scale(t_vec3 vector, float s)
     return ((t_vec3){vector.x * s, vector.y * s, vector.z * s});
 }
 
-
-
-// vec3 must be in range [0, 1]
-// unsigned int	get_color(t_vec3 colors)
-// {
-// 	unsigned int result;
-
-// //	result = 0;
-// 	result = (int)(colors.x * 255.99) << 16;
-// 	result |= (int)(colors.y * 255.99) << 8;
-// 	result |= (int)(colors.z * 255.99);
-// 	return (result);
-// }
-
 int to_rgb(t_vec3 c)
 {
 
@@ -373,24 +294,6 @@ int to_rgb(t_vec3 c)
     int b = (int)(fminf(fmaxf(c.z, 0.0f), 1.0f) * 255.0f);
     return ((r << 16) | (g << 8) | b);
 }
-
-// Render circle
-/*
-	(bx^2 + by^2)t^2 + (2(axbx + ayby))t + (ax^2 + ay^2 - r^2) = 0	
-
-	(bx^2 + by^2 + bz^2)t^2 + (2(axbx + ayby + azbz))t + (ax^2 + ay^2 + az^2 - r^2) = 0
-	Where:
-	a = Ray Origin
-	b = Ray Direction
-	r = radius
-	t = Ray Travel Distance
-
-
-	discriminant = b * b - 4 a c
-	if (discriminant < 0) = 0 hits
-	if (discriminant == 0) = 1 hit
-	if (discriminant > 0) = 2 hits
-*/
 
 int	init_mlx(t_program *data)
 {

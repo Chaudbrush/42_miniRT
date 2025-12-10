@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sphere.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/03 15:06:14 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/10 11:00:44 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,7 @@ int		init_float_array(char *str, t_vec3 *vector, int flag);
 int to_rgb(t_vec3 c);
 
 int	rt(t_program *data, t_vec3 vec);
-int raytrace_sphere(t_vec3 dir, t_vec3 center, t_vec3 light);
+int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light);
 int raytrace_cylinder(t_vec3 dir, t_vec3 origin, t_vec3 light);
 
 // Vector Functions
