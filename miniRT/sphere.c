@@ -76,7 +76,12 @@ int closest_vec(int *colors, t_vec3 **vecs, int total, t_vec3 camera)
 			continue ;
 		}
 		vec = vecs[i];
-		tdist = sqrt(((camera.x - vec->x)*(camera.x - vec->x)) + ((camera.y + vec->y)*(camera.y + vec->y)) + ((camera.x - vec->z)*(camera.x - vec->z)));
+		tdist = sqrt(
+		    (camera.x - vec->x) * (camera.x - vec->x) +
+		    (camera.y - vec->y) * (camera.y - vec->y) +
+		    (camera.z - vec->z) * (camera.z - vec->z)
+			);
+		//tdist = sqrt(((camera.x - vec->x)*(camera.x - vec->x)) + ((camera.y + vec->y)*(camera.y + vec->y)) + ((camera.x - vec->z)*(camera.x - vec->z)));
 		if (tdist < dist)
 		{
 			dist = tdist;
@@ -97,41 +102,76 @@ void	my_pixel_put(t_img *img, int x, int y, int color)
 	*(unsigned int *)pixel = color;
 }
 
-int	rt(t_program *data, t_vec3 vec)
+int rt(t_program *data, t_vec3 ray_dir)
 {
-	//t_vec3	origin_cylinder = {1, 0, -2};
-	//t_vec3	origin_sphere = {0, 0, -1};
-	t_types	*object;
-	int		i;
-	int		colors[5];
-	t_vec3	*vecs[5];
+    t_types *obj = data->objects;
+    t_vec3 origin = data->camera.coords;
 
-	i = 0;
-	object = data->objects;
-	while (object)
-	{	
-		if (object->type == 'y')
-		{
-			colors[i] = raytrace_cylinder(vec, (t_cylinder *)object, data->light.coords);
-			vecs[i] = &(((t_cylinder *)object)->coords);
+    float nearest_t = 1e9f;
+    int final_color = 0;
 
+    while (obj)
+    {
+        float t = -1.0;
+        int color = 0;
+
+        if (obj->type == 's')
+            color = raytrace_sphere(ray_dir, (t_sphere *)obj, data->light.coords, &t); 
+        else if (obj->type == 'y')
+            color = raytrace_cylinder(ray_dir, (t_cylinder *)obj, data->light.coords, &t); 
+	  	if (t > 0 && t < nearest_t && color != -1)
+	  	{
+			nearest_t = t;
+			final_color = color;
 		}
-		else if (object->type == 's')
-		{
-			colors[i] = raytrace_sphere(vec, (t_sphere *)object, data->light.coords);
-			vecs[i] = &(((t_cylinder *)object)->coords); 
-		}
-		if (object->type == 'p')
-		{
-			colors[i] = raytrace_plane(vec, (t_plane *)object, data->light.coords);
-			vecs[i] = &(((t_plane *)object)->coords); 
-		}
-		i++;
-		object = object->next;
-	}
-	return (closest_vec(colors, vecs, --i, data->camera.coords)); 
+        obj = obj->next;
+    }
+
+    return final_color;
 }
-int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
+
+/*
+int rt(t_program *data, t_vec3 ray_dir)
+{
+    t_types *object;
+    int i;
+    int colors[5];
+    t_vec3 *centers[5];
+	float nearest_t = 1000000000.0f;
+
+    i = 0;
+    object = data->objects;
+    while (object && i < 5)
+    {
+        if (object->type == 'y') // cylinder
+        {
+            colors[i] = raytrace_cylinder(ray_dir, (t_cylinder *)object, data->light.coords);
+            centers[i] = &(((t_cylinder *)object)->coords);
+        }
+        else if (object->type == 's') // sphere
+        {
+            colors[i] = raytrace_sphere(ray_dir, (t_sphere *)object, data->light.coords);
+            centers[i] = &(((t_sphere *)object)->coords);
+        }
+        else if (object->type == 'p') // plane (if you want center-like point)
+        {
+            colors[i] = raytrace_plane(ray_dir, (t_plane *)object, data->light.coords);
+            centers[i] = &(((t_plane *)object)->coords);
+        }
+        else
+        {
+            colors[i] = -1;
+            centers[i] = NULL;
+        }
+        i++;
+        object = object->next;
+    }
+    // i is now number of objects processed
+    return (closest_vec(colors, centers, --i, data->camera.coords));
+}
+*/
+
+int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, float *hit_point)
 {
 	t_vec3 origin = cyl->coords;
     float radius = cyl->radius;
@@ -155,7 +195,7 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 	float t = (t1 > 0) ? t1 : t2;
     if (t < 0) return -1;
 
-
+	*hit_point = t;
 
 	t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
@@ -212,7 +252,6 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light)
 
     if (yax)
 	{
-		return (0xFFFF0000);
 		if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
 	    int ir = (int)(r*255);
 	    int ig = (int)(g*255);
@@ -308,7 +347,7 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light)
 	return (0);
 }
 
-int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light)
+int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, float *hit_point)
 {
 	t_vec3 center = sphere->coords;
 	float radius = sphere->radius;
@@ -331,7 +370,7 @@ int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light)
     // Pick nearest positive intersection
     float t = (t0 > 0) ? t0 : t1;
     if (t < 0) return 0xFFFF0000;
-
+	*hit_point = t;
     // Hitpoint
     t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
