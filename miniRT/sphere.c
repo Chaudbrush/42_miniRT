@@ -259,10 +259,20 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 	if (denominator > 1e-6)
 	{
 		t = (dot_product(sub, plane->vector)) / denominator;
-		if (t >= 0)
-			return (to_rgb(plane->color));
+		if (t < 0)
+			return (-1);
+		data->hitpoint = t;
+
+    t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
+
+  	// Normalize light
+	t_vec3	L = normalize_vector(light);
+	return (phong_color(data, plane->color, normalize_vector(plane->vector), hit, L));
+
+
+//	return (to_rgb(plane->color));
 	}
-	return (0);
+	return (-1);
 }
 
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
