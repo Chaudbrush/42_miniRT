@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/02 17:24:18 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/14 20:03:19 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ int	parse_line(t_program *data, char *str, t_types **objects)
 	else
 	{
 		node = initialize_node(args);
-		printf("%p\n", node);
 		if (!node)
 			return (free_args(args), 1);
 		ft_lstadd_back(objects, node);
@@ -91,6 +90,9 @@ int	init_ambient(t_program *data, char **args)
 		data->ambient.ratio = num;
 	if (init_int_array(args[2], &data->ambient.color))
 		return (1);
+	data->ambient.color.x *= data->ambient.ratio;
+	data->ambient.color.y *= data->ambient.ratio;
+	data->ambient.color.z *= data->ambient.ratio;
 	return (0);
 }
 

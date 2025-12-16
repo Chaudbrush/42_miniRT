@@ -108,70 +108,31 @@ int rt(t_program *data, t_vec3 ray_dir)
     t_vec3 origin = data->camera.coords;
 
     float nearest_t = 1e9f;
-    int final_color = 0;
+    int final_color = to_rgb(data->ambient.color);
 
     while (obj)
     {
-        float t = -1.0;
+//        float t = -1.0;
+		data->hitpoint = -1;
         int color = 0;
 
         if (obj->type == 's')
-            color = raytrace_sphere(ray_dir, (t_sphere *)obj, data->light.coords, &t); 
+            color = raytrace_sphere(ray_dir, (t_sphere *)obj, data->light.coords, data); 
         else if (obj->type == 'y')
-            color = raytrace_cylinder(ray_dir, (t_cylinder *)obj, data->light.coords, &t); 
-	  	if (t > 0 && t < nearest_t && color != -1)
+            color = raytrace_cylinder(ray_dir, (t_cylinder *)obj, data->light.coords, data);
+		else if (obj->type == 'p')
+			color = raytrace_plane(ray_dir, (t_plane *)obj, data->light.coords, data);
+	  	if (data->hitpoint > 0 && data->hitpoint < nearest_t && color != -1)
 	  	{
-			nearest_t = t;
+			nearest_t = data->hitpoint;
 			final_color = color;
 		}
         obj = obj->next;
     }
-
     return final_color;
 }
 
-/*
-int rt(t_program *data, t_vec3 ray_dir)
-{
-    t_types *object;
-    int i;
-    int colors[5];
-    t_vec3 *centers[5];
-	float nearest_t = 1000000000.0f;
-
-    i = 0;
-    object = data->objects;
-    while (object && i < 5)
-    {
-        if (object->type == 'y') // cylinder
-        {
-            colors[i] = raytrace_cylinder(ray_dir, (t_cylinder *)object, data->light.coords);
-            centers[i] = &(((t_cylinder *)object)->coords);
-        }
-        else if (object->type == 's') // sphere
-        {
-            colors[i] = raytrace_sphere(ray_dir, (t_sphere *)object, data->light.coords);
-            centers[i] = &(((t_sphere *)object)->coords);
-        }
-        else if (object->type == 'p') // plane (if you want center-like point)
-        {
-            colors[i] = raytrace_plane(ray_dir, (t_plane *)object, data->light.coords);
-            centers[i] = &(((t_plane *)object)->coords);
-        }
-        else
-        {
-            colors[i] = -1;
-            centers[i] = NULL;
-        }
-        i++;
-        object = object->next;
-    }
-    // i is now number of objects processed
-    return (closest_vec(colors, centers, --i, data->camera.coords));
-}
-*/
-
-int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, float *hit_point)
+int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data)
 {
 	t_vec3 origin = cyl->coords;
     float radius = cyl->radius;
@@ -195,7 +156,7 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, float *hit_poin
 	float t = (t1 > 0) ? t1 : t2;
     if (t < 0) return -1;
 
-	*hit_point = t;
+	data->hitpoint = t;
 
 	t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
@@ -208,35 +169,37 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, float *hit_poin
     float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
     t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
 
-    // Diffuse
-    float diffuse = - (normal.x*L.x + normal.y*L.y + normal.z*L.z);
-    if (diffuse < 0) diffuse = 0;
+	int final_color = phong_color(data, cyl->color, normal, hit, L);
 
-    // Specular
-    t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
-    float vl = sqrtf(view.x*view.x + view.y*view.y + view.z*view.z);
-    view.x /= vl; view.y /= vl; view.z /= vl;
+    // // Diffuse
+    // float diffuse = - (normal.x*L.x + normal.y*L.y + normal.z*L.z);
+    // if (diffuse < 0) diffuse = 0x00000000;
 
-    // reflect(L, N) = L - 2*dot(L,N)*N
-    float dotLN = L.x*normal.x + L.y*normal.y + L.z*normal.z;
-    t_vec3 reflect = { L.x - 2*dotLN*normal.x, L.y - 2*dotLN*normal.y, L.z - 2*dotLN*normal.z };
+    // // Specular
+    // t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
+    // float vl = sqrtf(view.x*view.x + view.y*view.y + view.z*view.z);
+    // view.x /= vl; view.y /= vl; view.z /= vl;
 
-    float spec = reflect.x*view.x + reflect.y*view.y + reflect.z*view.z;
-    if (spec < 0) spec = 0;
-    float shininess = 50.0f;
-    spec = powf(spec, shininess);
-    float spec_strength = 0.5f;
-	float r = cyl->color.x;
-	float g = cyl->color.y;
-	b = cyl->color.z;
+    // // reflect(L, N) = L - 2*dot(L,N)*N
+    // float dotLN = L.x*normal.x + L.y*normal.y + L.z*normal.z;
+    // t_vec3 reflect = { L.x - 2*dotLN*normal.x, L.y - 2*dotLN*normal.y, L.z - 2*dotLN*normal.z };
 
-    // Apply diffuse
-    r *= diffuse; g *= diffuse; b *= diffuse;
+    // float spec = reflect.x*view.x + reflect.y*view.y + reflect.z*view.z;
+    // if (spec < 0) spec = 0;
+    // float shininess = 50.0f;
+    // spec = powf(spec, shininess);
+    // float spec_strength = 0.5f;
+	// float r = cyl->color.x;
+	// float g = cyl->color.y;
+	// b = cyl->color.z;
 
-    // Add specular (white)
-    r += spec_strength*spec;
-    g += spec_strength*spec;
-    b += spec_strength*spec;
+    // // Apply diffuse
+    // r *= diffuse; g *= diffuse; b *= diffuse;
+
+    // // Add specular (white)
+    // r += spec_strength*spec;
+    // g += spec_strength*spec;
+    // b += spec_strength*spec;
 
     // Check both intersections
     float y1 = oc.y + t1 * dir.y;
@@ -249,57 +212,15 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, float *hit_poin
         yax = 1;
     else if (y2 >= -half && y2 <= half)
         yax = 1;
-
     if (yax)
-	{
-		if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
-	    int ir = (int)(r*255);
-	    int ig = (int)(g*255);
-	    int ib = (int)(b*255);
-
-	    return (ir<<16)|(ig<<8)|ib;
-	}
+		return (final_color);
     return -1;
 }
 
-int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light)
+int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 {
 	
 	/*
-	Definition:
-	
-	C is a point that lies on the plane
-	V is the plane normal (unit length)
-
-	To hit a plane we notice that:
-
-		(P-C)|V = 0
-
-	This means that the P-C vector is perpendicular to the normal, which is true when the point P lies on the plane.
-
-	Solution:
-
-		(D*t+X)|V = 0
-		D|V*t = -X|V
-		t = -X|V / D|V
-
-	Before the division we should check whether D|V is nonzero. We can also check if the signs of D|V and X|V are different (if not, resulting t will be negative).
-
-	Surface normal vector at point P equals to the plane normal, unless D|V is negative, in which case N=-V. 
-	
-	
-	X:O - C - where O is the ray origin, C is the center of the shape we hit
-	V: the plane normal
-	D: ray direction
-
-	C = origin;
-	V = data->
-	
-	D = dir;
-	0 = ray_origin;
-
-
-
 	A plane is characterized by a point p0, indicating its distance from the world's origin, and a normal , which defines the plane's orientation.
 	We can derive a vector on the plane from any point p on it by subtracting p0 from p.
 	Since this resultant vector lies within the plane, it is perpendicular to the plane's normal.
@@ -325,7 +246,6 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light)
 
 	It's worth noting that if the plane and ray are parallel (i.e., when approaches 0), they either perfectly coincide, offering an infinite number of solutions, or they do not intersect at all.
 	In practical C++ implementations, we typically return false (indicating no intersection) when the denominator is less than a very small threshold.
-
 	*/
 
 	float	t;
@@ -336,18 +256,16 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light)
 	(void)light;
 	sub = vec_sub(plane->coords, ray_origin);
 	denominator = dot_product(plane->vector, dir);
-//	printf("denom: %f\n", denominator);
 	if (denominator > 1e-6)
 	{
 		t = (dot_product(sub, plane->vector)) / denominator;
-//		printf("t: %f\n", t);
 		if (t >= 0)
-			return (0xFFFF00FF);
+			return (to_rgb(plane->color));
 	}
 	return (0);
 }
 
-int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, float *hit_point)
+int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
 {
 	t_vec3 center = sphere->coords;
 	float radius = sphere->radius;
@@ -370,60 +288,119 @@ int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, float *hit_point
     // Pick nearest positive intersection
     float t = (t0 > 0) ? t0 : t1;
     if (t < 0) return 0xFFFF0000;
-	*hit_point = t;
+	data->hitpoint = t;
     // Hitpoint
     t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
     // Normal at hitpoint
     t_vec3 normal = { hit.x - center.x, hit.y - center.y, hit.z - center.z };
-    float nl = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
-    normal.x /= nl; normal.y /= nl; normal.z /= nl;
+	normal = normalize_vector(normal);
 
     // Normalize light
-    float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
-    t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
+	t_vec3	L = normalize_vector(light);
 
-    // Diffuse
-    float diffuse = - (normal.x*L.x + normal.y*L.y + normal.z*L.z);
-    if (diffuse < 0) diffuse = 0;
+	return (phong_color(data, sphere->color, normal, hit, L)); // Do we really need to pass light? Cant I normalize the light inside data and we use it from there?
 
-    // Specular
-    t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
-    float vl = sqrtf(view.x*view.x + view.y*view.y + view.z*view.z);
-    view.x /= vl; view.y /= vl; view.z /= vl;
+    // // Diffuse
+	// float diffuse = -dot_product(normal, L);
+    // if (diffuse < 0) diffuse = 0x00000000;
 
-    // reflect(L, N) = L - 2*dot(L,N)*N
-    float dotLN = L.x*normal.x + L.y*normal.y + L.z*normal.z;
-    t_vec3 reflect = { L.x - 2*dotLN*normal.x, L.y - 2*dotLN*normal.y, L.z - 2*dotLN*normal.z };
+    // // Specular
+    // t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
+	// view = normalize_vector(view);
 
-    float spec = reflect.x*view.x + reflect.y*view.y + reflect.z*view.z;
-    if (spec < 0) spec = 0;
-    float shininess = 50.0f;
-    spec = powf(spec, shininess);
-    float spec_strength = 0.5f;
+	// float dotLN = dot_product(L, normal);
+    // t_vec3 reflect = { L.x - 2*dotLN*normal.x, L.y - 2*dotLN*normal.y, L.z - 2*dotLN*normal.z };
 
-	float r = sphere->color.x;
-	float g = sphere->color.y;
-	b = sphere->color.z;
+	// float	spec = dot_product(reflect, view);
+    // if (spec < 0) spec = 0;
+    // float shininess = 100.0f;
+    // spec = powf(spec, shininess);
+    // float spec_strength = 0.5f;
 
-    // Apply diffuse
-    r *= diffuse; g *= diffuse; b *= diffuse;
+	// float r = sphere->color.x;
+	// float g = sphere->color.y;
+	// b = sphere->color.z;
 
-    // Add specular (white)
-    r += spec_strength*spec;
-    g += spec_strength*spec;
-    b += spec_strength*spec;
+    // // Apply diffuse
+    // r *= diffuse; g *= diffuse; b *= diffuse;
 
-    // Clamp
-    if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
+    // // Add specular (white)
+    // r += spec_strength*spec;
+    // g += spec_strength*spec;
+    // b += spec_strength*spec;
 
-    // Convert to int RGB
-    int ir = (int)(r*255);
-    int ig = (int)(g*255);
-    int ib = (int)(b*255);
+    // // Clamp
+    // if (r>1) r=1; if (g>1) g=1; if (b>1) b=1;
 
-    return (ir<<16)|(ig<<8)|ib;
+    // // Convert to int RGB
+    // int ir = (int)(r*255);
+    // int ig = (int)(g*255);
+    // int ib = (int)(b*255);
+
+    // return (ir<<16)|(ig<<8)|ib;
 }
+
+int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3 light)
+{
+	/*
+	Phong Color Model
+
+	color = Ambient + Md * Diffuse + Ms * Specular
+
+	multiply each one of them by the object color !
+
+	Md = Material Diffuse
+	Ms = Material Specular
+
+	Ambient = light_color * light_strength * object_color
+
+	Diffuse = dot_product(light_direction, surface_normal) * object_color
+
+	Specular = pow(dot(reflected_light_direction, view_direction), shininess) * object_color
+
+	typedef struct s_material
+	{
+		float	ambience;
+		float	diffuse;
+		float	specular;
+		float	shininess;
+	}	t_material;
+
+	*/
+	t_vec3	ambient;
+	t_vec3	diffuse;
+	t_vec3	specular = {0.0};
+
+	ambient = vec_mult(data->ambient.color, color);
+	float diffuse_dot = -dot_product(normal, light);
+	if (diffuse_dot < 0)
+		diffuse_dot = 0;
+	diffuse = vec_scale(color, diffuse_dot);
+
+	// Organize this better
+
+	t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
+	view = normalize_vector(view);
+
+	float	shininess = 50.0f;
+	float	spec_strength = 0.5f;
+	float dotLN = dot_product(light, normal);
+	t_vec3 reflect = { light.x - 2*dotLN*normal.x, light.y - 2*dotLN*normal.y, light.z - 2*dotLN*normal.z };
+
+	float spec = dot_product(reflect, view);
+	if (spec < 0)
+		spec = 0;
+	float specular_coeff = pow(spec, shininess) * spec_strength;
+	specular = vec_scale(color, specular_coeff);
+
+	return (to_rgb(vec_add(vec_add(ambient, diffuse), specular)));
+}
+
+
+
+
+
 // VECTOR FUNCTIONS
 t_vec3	normalize_vector(t_vec3 vector)
 {
@@ -479,7 +456,6 @@ float	dot_product(t_vec3 v1, t_vec3 v2)
 
 int to_rgb(t_vec3 c)
 {
-
     int r = (int)(fminf(fmaxf(c.x, 0.0f), 1.0f) * 255.0f);
     int g = (int)(fminf(fmaxf(c.y, 0.0f), 1.0f) * 255.0f);
     int b = (int)(fminf(fmaxf(c.z, 0.0f), 1.0f) * 255.0f);
@@ -557,7 +533,8 @@ void	print_list(t_types *lst)
 
 int	clean_exit(t_program *data)
 {
-	print_list(data->objects);
+	printf("ambient: %f, %f, %f", data->ambient.color.x, data->ambient.color.y, data->ambient.color.z);
+	print_list(data->objects); // DELETE
 	ft_lstclear(data->objects);
 	mlx_destroy_image(data->mlx, data->img_data.img);
 	mlx_destroy_window(data->mlx, data->win);
