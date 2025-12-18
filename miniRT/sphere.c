@@ -16,8 +16,8 @@ int	main(int argc, char **argv)
 {
 	t_program	data;
 	
-	if (parse_data(&data, argc, argv) || init_mlx(&data))
-		exit (1); // Check errors
+	if (parse_data(&data, argc, argv, 0) || init_mlx(&data))
+		exit (1);
 	mlx_loop_hook(data.mlx, render, &data);
 	mlx_hook(data.win, DestroyNotify, NoEventMask, clean_exit, &data);
 	mlx_hook(data.win, KeyPress, KeyPressMask, key_handler, &data);
@@ -105,14 +105,12 @@ void	my_pixel_put(t_img *img, int x, int y, int color)
 int rt(t_program *data, t_vec3 ray_dir)
 {
     t_types *obj = data->objects;
-    t_vec3 origin = data->camera.coords;
 
     float nearest_t = 1e9f;
     int final_color = to_rgb(data->ambient.color);
 
     while (obj)
     {
-//        float t = -1.0;
 		data->hitpoint = -1;
         int color = 0;
 
@@ -169,7 +167,12 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
     float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
     t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
 
-	int final_color = phong_color(data, cyl->color, normal, hit, L);
+	int final_color;
+
+	if (check_shadow(data, hit, vec_scale(L, -1.0), cyl->index))
+		final_color = (to_rgb(vec_mult(data->ambient.color, cyl->color))); // Ambient light
+	else
+		final_color = phong_color(data, cyl->color, normal, hit, L);
 
     // // Diffuse
     // float diffuse = - (normal.x*L.x + normal.y*L.y + normal.z*L.z);
@@ -219,7 +222,6 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
 
 int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 {
-	
 	/*
 	A plane is characterized by a point p0, indicating its distance from the world's origin, and a normal , which defines the plane's orientation.
 	We can derive a vector on the plane from any point p on it by subtracting p0 from p.
@@ -263,17 +265,139 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 			return (-1);
 		data->hitpoint = t;
 
-    t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
+	    t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
-  	// Normalize light
-	t_vec3	L = normalize_vector(light);
-	return (phong_color(data, plane->color, normalize_vector(plane->vector), hit, L));
+	  	// Normalize light
+		t_vec3	L = normalize_vector(light);
+
+		/*
+			Need to cast a ray to the shadow
+		
+			data = to get access to the other objects
+			ray origin = hit ??
+			ray direction = - light_direction
+			i = index from my actual object (to ignore)
+
+		*/
 
 
-//	return (to_rgb(plane->color));
+		if (check_shadow(data, hit, vec_scale(L, -1.0), plane->index))
+			return (to_rgb(vec_mult(data->ambient.color, plane->color))); // Ambient light
+		else
+			return (phong_color(data, plane->color, vec_scale(normalize_vector(plane->vector), -1.0), hit, L));
 	}
 	return (-1);
 }
+
+int	check_shadow(t_program *data, t_vec3 ray_origin, t_vec3 ray_dir, int i)
+{
+	int	flag;
+    t_types *obj;
+	
+	flag = 0;
+	obj = data->objects;
+    while (obj)
+    {
+        if (obj->type == 's' && ((t_sphere *)obj)->index != i)
+            flag = shadow_sphere(ray_dir, (t_sphere *)obj, data->light.coords, data, ray_origin); 
+        else if (obj->type == 'y' && ((t_sphere *)obj)->index != i)
+            flag = shadow_cylinder(ray_dir, (t_cylinder *)obj, data->light.coords, data, ray_origin);
+		else if (obj->type == 'p' && ((t_sphere *)obj)->index != i)
+			flag = shadow_plane(ray_dir, (t_plane *)obj, data->light.coords, data, ray_origin);
+	  	if (flag)
+			return (flag);
+        obj = obj->next;
+    }
+    return (flag);
+}
+
+int shadow_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data, t_vec3 ray_origin)
+{
+	t_vec3 center = sphere->coords;
+	float radius = sphere->radius;
+
+    // Quadratic coefficients
+    t_vec3 oc = { ray_origin.x - center.x, ray_origin.y - center.y, ray_origin.z - center.z };
+    float a = dir.x*dir.x + dir.y*dir.y + dir.z*dir.z;
+    float b = 2.0f * (oc.x*dir.x + oc.y*dir.y + oc.z*dir.z);
+    float c = oc.x*oc.x + oc.y*oc.y + oc.z*oc.z - radius*radius;
+
+    float disc = b*b - 4*a*c;
+    if (disc < 0.0f)
+		return (0);
+//	return (0);
+
+    float sqrtD = sqrtf(disc);
+    float t0 = (-b - sqrtD) / (2*a);
+    float t1 = (-b + sqrtD) / (2*a);
+
+    // Pick nearest positive intersection
+    float t = (t0 > 0) ? t0 : t1;
+    if (t > 0) 
+		return (1);
+	return (0);
+}
+
+int shadow_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data, t_vec3 ray_origin)
+{
+	t_vec3 origin = cyl->coords;
+    float radius = cyl->radius;
+    float height = cyl->height;
+
+	t_vec3 oc = { ray_origin.x - origin.x, ray_origin.y - origin.y, ray_origin.z - origin.z };
+    // Cylinder aligned along Y-axis now
+    float a = dir.x * dir.x + dir.z * dir.z;
+    float b = 2.0 * (oc.x * dir.x + oc.z * dir.z);
+    float c = oc.x * oc.x + oc.z * oc.z - radius * radius;
+
+    float discriminant = b*b - 4*a*c;
+    if (discriminant < 0.0)
+        return (0); // no hit
+
+    float sqrtD = sqrt(discriminant);
+    float t1 = (-b - sqrtD) / (2*a);
+    float t2 = (-b + sqrtD) / (2*a);
+
+	float t = (t1 > 0) ? t1 : t2;
+    if (t > 0)
+	{
+		float y1 = oc.y + t1 * dir.y;
+		float y2 = oc.y + t2 * dir.y;
+
+		// Cylinder extends from -height/2 to +height/2 along Y
+		float half = height / 2.0;
+		int yax = 0; // default: no hit
+		if (y1 >= -half && y1 <= half)
+			yax = 1;
+		else if (y2 >= -half && y2 <= half)
+			yax = 1;
+		if (yax)
+			return (1);
+		return (0);
+	}
+	return (0);
+}
+
+int shadow_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data, t_vec3 ray_origin)
+{
+	float	t;
+	float	denominator;
+	t_vec3	sub;
+	
+	(void)light;
+	sub = vec_sub(plane->coords, ray_origin);
+	denominator = dot_product(plane->vector, dir);
+	if (denominator > 1e-6)
+	{
+		t = (dot_product(sub, plane->vector)) / denominator;
+		if (t > 0)
+			return (1);
+		return (0);
+	}
+	return (0);
+}
+
+
 
 int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
 {
@@ -309,7 +433,10 @@ int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
     // Normalize light
 	t_vec3	L = normalize_vector(light);
 
-	return (phong_color(data, sphere->color, normal, hit, L)); // Do we really need to pass light? Cant I normalize the light inside data and we use it from there?
+	if (check_shadow(data, hit, vec_scale(L, -1.0), sphere->index))
+		return (to_rgb(vec_mult(data->ambient.color, sphere->color))); // Ambient light
+	else
+		return (phong_color(data, sphere->color, normal, hit, L)); // Do we really need to pass light? Cant I normalize the light inside data and we use it from there?
 
     // // Diffuse
 	// float diffuse = -dot_product(normal, L);
@@ -380,23 +507,25 @@ int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3
 	*/
 	t_vec3	ambient;
 	t_vec3	diffuse;
-	t_vec3	specular = {0.0};
+	t_vec3	specular = {0,0,0};
 
 	ambient = vec_mult(data->ambient.color, color);
+
+	
 	float diffuse_dot = -dot_product(normal, light);
 	if (diffuse_dot < 0)
 		diffuse_dot = 0;
 	diffuse = vec_scale(color, diffuse_dot);
 
-	// Organize this better
+//	Organize this better
 
 	t_vec3 view = { -hit.x, -hit.y, -hit.z }; // camera at origin
 	view = normalize_vector(view);
 
-	float	shininess = 50.0f;
+	float	shininess = 100.0f;
 	float	spec_strength = 0.5f;
 	float dotLN = dot_product(light, normal);
-	t_vec3 reflect = { light.x - 2*dotLN*normal.x, light.y - 2*dotLN*normal.y, light.z - 2*dotLN*normal.z };
+	t_vec3 reflect = { light.x - 2 * dotLN * normal.x, light.y - 2 * dotLN * normal.y, light.z - 2 * dotLN * normal.z }; // r = (2(n * l) n) - l
 
 	float spec = dot_product(reflect, view);
 	if (spec < 0)
@@ -406,8 +535,6 @@ int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3
 
 	return (to_rgb(vec_add(vec_add(ambient, diffuse), specular)));
 }
-
-
 
 
 
