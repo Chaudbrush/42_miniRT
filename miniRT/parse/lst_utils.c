@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:30:03 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/18 11:36:49 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/21 11:48:53 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void	index_list(t_types *lst)
 	int			i;
 
 	i = 0;
-	while(lst)
+	while (lst)
 	{
 		((t_sphere *)lst)->index = i;
 		lst = lst->next;
@@ -62,4 +62,17 @@ void	correct_string(char *str, char c)
 	len = ft_strlen(str);
 	if (str[len - 1] == c)
 		str[len - 1] = ' ';
+}
+
+int	check_vector(t_vec3 v, char *str)
+{
+	t_vec3	normalized;
+
+	normalized = normalize_vector(v);
+	if (v.x != normalized.x || v.y != normalized.y || v.z != normalized.z)
+	{
+		print_err(NORMALIZED_ERR, str);
+		return (1);
+	}
+	return (0);
 }

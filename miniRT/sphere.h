@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/18 13:48:41 by vloureir         ###   ########.fr       */
+/*   Updated: 2025/12/21 11:53:56 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,11 @@
 # define ARGV_ERR "-error: Too many arguments\n"
 # define EXTENSION_ERR "-error: Wrong extension\n"
 # define EMPTY_ERR "-error: Empty file\n"
-# define MALLOC_ERR "-error: Malloc Failure\n"
-# define QUANTITY_ERR "-error: Missing or Extra arguments\n"
-# define NUMBER_ERR "-error: Invalid Numeric arguments\n"
-# define INVALID_ERR "-error: Invalid Identifier\n"
+# define MALLOC_ERR "-error: Malloc failure\n"
+# define QUANTITY_ERR "-error: Invalid amount of arguments: "
+# define NUMBER_ERR "-error: Invalid numeric arguments: "
+# define INVALID_ERR "-error: Invalid identifier: "
+# define NORMALIZED_ERR "-error: Vector not normalized: "
 
 typedef unsigned char t_uchar;
 
@@ -131,6 +132,8 @@ int		check_args(int argc, char **argv, int *fd);
 int		parse_data(t_program *data, int argc, char **argv, int count);
 int		parse_line(t_program *data, char *str, t_types **objects, int flag);
 
+
+
 // Helper Functions
 void	free_args(char **argv);
 int		argv_size(char **argv);
@@ -139,11 +142,11 @@ int		check_extenssion(char *str);
 int		ft_strcmp(char *s1, char *s2);
 
 // Init Data
-int		init_int_array(char *str, t_vec3 *color);
 int		init_light(t_program *data, char **args);
 int		init_camera(t_program *data, char **args);
 int		init_ambient(t_program *data, char **args);
-int		init_float_array(char *str, t_vec3 *vector, int flag);
+int		init_int_array(char *str, t_vec3 *color, char *type);
+int		init_float_array(char *str, t_vec3 *vector, int flag, char *type);
 
 // Init Nodes
 t_types	*init_plane(char **args);
@@ -152,8 +155,10 @@ t_types	*init_cylinder(char **args);
 t_types	*initialize_node(char **args);
 
 // Lst Utils
+void	index_list(t_types *lst);
 void	ft_lstclear(t_types *lst);
 void	correct_string(char *str, char c);
+int		check_vector(t_vec3 v, char *str);
 void	ft_lstadd_back(t_types **lst, t_types *node);
 
 
@@ -207,6 +212,6 @@ int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3
 // DELETE
 void	print_list(t_types *lst);
 
-
+void	print_err(char *s1, char *s2);
 
 #endif
