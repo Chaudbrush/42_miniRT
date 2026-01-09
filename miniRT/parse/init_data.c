@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:24:16 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/21 11:43:45 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/07 14:12:01 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,15 @@
 
 int	init_ambient(t_program *data, char **args)
 {
-	double	num;
+	double	nb;
 
 	if (argv_size(args) != 3)
 		return (print_err(QUANTITY_ERR, "Ambient\n"), 1);
-	num = ft_atolf(args[1]);
-	if (!is_valid_float(args[1], num) || num < 0.0 || num > 1.0)
+	nb = ft_atolf(args[1]);
+	if (!is_valid_float(args[1], nb) || nb < 0.0 || nb > 1.0)
 		return (print_err(NUMBER_ERR, "Ambient\n"), 1);
 	else
-		data->ambient.ratio = num;
+		data->ambient.ratio = nb;
 	if (init_int_array(args[2], &data->ambient.color, "Ambient\n"))
 		return (1);
 	data->ambient.color.x *= data->ambient.ratio;

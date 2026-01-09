@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:21:56 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/21 11:52:54 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/07 14:11:45 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ t_types	*init_sphere(char **args)
 	if (init_float_array(args[1], &node->coords, 0, "Sphere\n"))
 		return (free(node), NULL);
 	nb = ft_atolf(args[2]);
-	if (!is_valid_float(args[2], nb))
+	if (!is_valid_float(args[2], nb) || nb < 0.0)
 		return (print_err(NUMBER_ERR, "Sphere\n"), NULL);
 	else
 		node->radius = nb;
@@ -68,12 +68,12 @@ t_types	*init_cylinder(char **args)
 		|| check_vector(node->vector, "Cylinder\n"))
 		return (free(node), NULL);
 	nb = ft_atolf(args[3]);
-	if (!is_valid_float(args[3], nb))
+	if (!is_valid_float(args[3], nb) || nb < 0.0)
 		return (print_err(NUMBER_ERR, "Cylinder\n"), NULL);
 	else
 		node->radius = nb;
 	nb = ft_atolf(args[4]);
-	if (!is_valid_float(args[4], nb))
+	if (!is_valid_float(args[4], nb) || nb < 0.0)
 		return (print_err(NUMBER_ERR, "Cylinder\n"), NULL);
 	else
 		node->height = nb;

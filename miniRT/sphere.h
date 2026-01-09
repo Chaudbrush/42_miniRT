@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/21 11:53:56 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/08 12:29:02 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 
 # define HEIGHT 1000
 # define WIDTH 1000
+# define MY_PI 3.14159265
 
 # define FILE_ERR "-error: Missing file argument\n"
 # define ARGV_ERR "-error: Too many arguments\n"

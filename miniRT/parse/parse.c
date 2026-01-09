@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/18 11:29:50 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/07 14:12:34 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,13 +101,8 @@ int	is_valid_float(char *str, double nb)
 	i = 0;
 	sign = 0;
 	point = 0;
-	(void)nb; // Remove if the check below works
-//	The check below doesnt work, why?
-	// if (nb < FLT_MIN || nb > FLT_MAX)
-	// {
-	// 	printf("%lf, %f\n", nb, FLT_MIN);
-	// 	return (0);
-	// }
+	if (nb < -FLT_MAX || nb > FLT_MAX)
+		return (0);
 	if ((str[i] == '-' || str[i] == '+') && str[i + 1])
 		i++;
 	while (str[i])

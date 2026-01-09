@@ -24,6 +24,81 @@ int	main(int argc, char **argv)
 	mlx_loop(data.mlx);
 }
 
+
+/*
+NEW CAMERA
+
+Raster Space -> NDC Space -> World Space
+
+-- NDC --
+x_NDC = (pixel_x + 0.5) / WIDTH
+y_NDC = (pixel_y + 0.5) / HEIGHT
+
+
+-- World --
+x_screen = (2 * x_NDC) - 1
+y_screen  = 1 - (2 * y_NDC)
+
+
+-- Apply Aspect Ratio --
+Aspect_Ratio = WIDTH / HEIGHT
+x_screen = ((2 * x_NDC) - 1) * Aspect_Ratio
+y_screen  = 1 - (2 * y_NDC)
+
+
+
+-- Apply the fov --
+x_screen = ((2 * x_NDC) - 1) * Aspect_Ratio * tan(data->camera.fov / 2)
+y_screen  = 1 - (2 * y_NDC) * tan(data->camera.fov / 2)
+
+
+-- Ray Origin --
+P_camera_space = (x_screen, y_screen, -1)
+
+
+		
+float Px = (2 * ((x + 0.5) / imageWidth) - 1) * tan(fov / 2 * M_PI / 180) * imageAspectRatio;
+
+Px = x_screen
+
+float Py = (1 - 2 * ((y + 0.5) / imageHeight) * tan(fov / 2 * M_PI / 180);
+
+*/
+
+// int	render(t_program *data)
+// {
+// 	int		color;
+// 	float	x;
+// 	float	y;
+// 	double	scaled_x;
+// 	double	scaled_y;
+// 	float	aspect;
+
+// 	y = -1.0;
+// 	while (++y < HEIGHT)
+// 	{
+// 		x = -1.0;
+// 		while (++x < WIDTH)
+// 		{
+
+// 			if (WIDTH > HEIGHT)
+// 				aspect = (float)WIDTH / (float)HEIGHT;	
+// 			else
+// 				aspect = (float)HEIGHT / (float)WIDTH; 
+// 			scaled_x = (2.0 * (x /	WIDTH)) - 1.0;
+// 			scaled_y = (2.0 * (y /	HEIGHT)) - 1.0;
+// 			if (WIDTH > HEIGHT)
+// 				scaled_x *= aspect;
+// 			else
+// 				scaled_y *= aspect;
+// 			color = rt(data, (t_vec3){scaled_x, scaled_y, -1.0f});
+// 			my_pixel_put(&data->img_data, x, y, color);	
+// 		}
+// 	}
+// 	mlx_put_image_to_window(data->mlx, data->win, data->img_data.img, 0, 0);
+// 	return (0);
+// }
+
 int	render(t_program *data)
 {
 	int		color;
@@ -32,6 +107,9 @@ int	render(t_program *data)
 	double	scaled_x;
 	double	scaled_y;
 	float	aspect;
+
+
+
 
 	y = -1.0;
 	while (++y < HEIGHT)
@@ -44,13 +122,35 @@ int	render(t_program *data)
 				aspect = (float)WIDTH / (float)HEIGHT;	
 			else
 				aspect = (float)HEIGHT / (float)WIDTH; 
-			scaled_x = (2.0 * (x /	WIDTH)) - 1.0;
-			scaled_y = (2.0 * (y /	HEIGHT)) - 1.0;
-			if (WIDTH > HEIGHT)
-				scaled_x *= aspect;
-			else
-				scaled_y *= aspect;
-			color = rt(data, (t_vec3){scaled_x, scaled_y, -1.0f});
+			// scaled_x = (2.0 * (x /	WIDTH)) - 1.0;
+			// scaled_y = (2.0 * (y /	HEIGHT)) - 1.0;
+			// if (WIDTH > HEIGHT)
+			// 	scaled_x *= aspect;
+			// else
+			// 	scaled_y *= aspect;
+
+
+		//	-- NDC --	
+			float	x_NDC = (x + 0.5) / WIDTH;
+			float	y_NDC = (y + 0.5) / HEIGHT;
+
+		//	-- World --
+			float	x_screen = (2 * x_NDC) - 1;
+			float	y_screen  = 1 - (2 * y_NDC);
+
+
+		//	-- Apply Aspect Ratio --
+			float	Aspect_Ratio = WIDTH / HEIGHT;
+			x_screen = ((2 * x_NDC) - 1) * Aspect_Ratio;
+			y_screen  = 1 - (2 * y_NDC);
+
+		//	-- Apply the fov --
+			x_screen = ((2 * x_NDC) - 1) * Aspect_Ratio * tan(data->camera.fov / 2 * MY_PI / 180);
+			y_screen  = 1 - (2 * y_NDC) * tan(data->camera.fov / 2 * MY_PI / 180);
+
+			color = rt(data, (t_vec3){x_screen, -y_screen, -1.0f});
+
+//			color = rt(data, (t_vec3){scaled_x, scaled_y, -1.0f});
 			my_pixel_put(&data->img_data, x, y, color);	
 		}
 	}
@@ -135,7 +235,8 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
 	t_vec3 origin = cyl->coords;
     float radius = cyl->radius;
     float height = cyl->height;
-	t_vec3 ray_origin = {0,0,0};
+//	t_vec3 ray_origin = {0,0,0};
+	t_vec3	ray_origin = data->camera.coords;
 
 	t_vec3 oc = { ray_origin.x - origin.x, ray_origin.y - origin.y, ray_origin.z - origin.z };
     // Cylinder aligned along Y-axis now
@@ -253,7 +354,8 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 	float	t;
 	float	denominator;
 	t_vec3	sub;
-	t_vec3 ray_origin = {0,0,0};
+//	t_vec3 ray_origin = {0,0,0};
+	t_vec3	ray_origin = data->camera.coords;
 	
 	(void)light;
 	sub = vec_sub(plane->coords, ray_origin);
@@ -403,7 +505,8 @@ int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
 {
 	t_vec3 center = sphere->coords;
 	float radius = sphere->radius;
-    t_vec3 ray_origin = {0,0,0};
+//    t_vec3 ray_origin = {0,0,0};
+	t_vec3	ray_origin = data->camera.coords;
 
 
     // Quadratic coefficients
