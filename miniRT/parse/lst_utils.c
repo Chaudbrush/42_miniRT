@@ -6,7 +6,7 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:30:03 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/21 11:48:53 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/12 14:32:15 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,34 @@ void	correct_string(char *str, char c)
 		str[len - 1] = ' ';
 }
 
-int	check_vector(t_vec3 v, char *str)
+int check_vector(t_vec3 v, char *str)
 {
-	t_vec3	normalized;
+    float len;
+    float epsilon = 1e-2;
 
-	normalized = normalize_vector(v);
-	if (v.x != normalized.x || v.y != normalized.y || v.z != normalized.z)
-	{
-		print_err(NORMALIZED_ERR, str);
-		return (1);
-	}
-	return (0);
+    len = sqrt(
+        v.x*v.x +
+        v.y*v.y +
+        v.z*v.z
+    );
+
+    if (fabs(len - 1.0f) > epsilon)
+    {
+        print_err(NORMALIZED_ERR, str);
+        return (1);
+    }
+    return (0);
 }
+
+// int	check_vector(t_vec3 v, char *str)
+// {
+// 	t_vec3	normalized;
+
+// 	normalized = normalize_vector(v);
+// 	if (v.x != normalized.x || v.y != normalized.y || v.z != normalized.z)
+// 	{
+// 		print_err(NORMALIZED_ERR, str);
+// 		return (1);
+// 	}
+// 	return (0);
+// }
