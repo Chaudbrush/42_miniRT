@@ -447,7 +447,8 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
     float hit_h = oc_dot_a + t*d_dot_a;
     float half = height*0.5f;
     t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
-
+	t_vec3	L_dir = normalize_vector(vec_sub(hit, light));
+	
     if (hit_h >= -half && hit_h <= half)
     {
         data->hitpoint = t;
@@ -460,15 +461,17 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
         float nl = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
         normal.x /= nl; normal.y /= nl; normal.z /= nl;
 
-        // Light normalization
-        float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
-        t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
+        // // Light normalization
+        // float ll = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
+        // t_vec3 L = { light.x/ll, light.y/ll, light.z/ll };
+
+		
 
         int final_color;
-        if (check_shadow(data, hit, vec_scale(L,-1.0), cyl->index))
-            final_color = to_rgb(vec_mult(data->ambient.color, cyl->color));
-        else
-            final_color = phong_color(data, cyl->color, normal, hit, L);
+        // if (check_shadow(data, hit, vec_scale(L,-1.0), cyl->index))
+        //     final_color = to_rgb(vec_mult(data->ambient.color, cyl->color));
+        // else
+            final_color = phong_color(data, cyl->color, normal, hit, L_dir);
 
         return final_color;
     }
@@ -492,7 +495,7 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
             if (dist2 <= radius*radius)
             {
                 data->hitpoint = t_cap;
-                return phong_color(data, cyl->color, axis, hit_cap, normalize_vector(light)); // normal = axis
+                return phong_color(data, cyl->color, axis, hit_cap, L_dir); // normal = axis
             }
         }
     }
@@ -515,7 +518,7 @@ int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data
             if (dist2 <= radius*radius)
             {
                 data->hitpoint = t_cap;
-                return phong_color(data, cyl->color, vec_scale(axis,-1), hit_cap, normalize_vector(light)); // normal = -axis
+                return phong_color(data, cyl->color, vec_scale(axis,-1), hit_cap, L_dir); // normal = -axis
             }
         }
     }
@@ -572,7 +575,8 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 	    t_vec3 hit = { ray_origin.x + dir.x*t, ray_origin.y + dir.y*t, ray_origin.z + dir.z*t };
 
 	  	// Normalize light
-		t_vec3	L = normalize_vector(light);
+//		t_vec3	L = normalize_vector(light);
+		t_vec3	L_dir = normalize_vector(vec_sub(hit, light));
 
 		/*
 			Need to cast a ray to the shadow
@@ -585,10 +589,10 @@ int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 		*/
 
 
-		if (check_shadow(data, hit, vec_scale(L, -1.0), plane->index))
+		if (check_shadow(data, hit, vec_scale(L_dir, -1.0), plane->index))
 			return (to_rgb(vec_mult(data->ambient.color, plane->color))); // Ambient light
 		else
-			return (phong_color(data, plane->color, vec_scale(normalize_vector(plane->vector), -1.0), hit, L));
+			return (phong_color(data, plane->color, vec_scale(normalize_vector(plane->vector), -1.0), hit, L_dir));
 	}
 	return (-1);
 }
@@ -832,12 +836,14 @@ int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
 	normal = normalize_vector(normal);
 
     // Normalize light
-	t_vec3	L = normalize_vector(light);
+//	t_vec3	L = normalize_vector(light);
+//	t_vec3	L_dir = vec_scale(normalize_vector(vec_sub(light, hit)), -1.0);
+	t_vec3	L_dir = normalize_vector(vec_sub(hit, light));
 
-	if (check_shadow(data, hit, vec_scale(L, -1.0), sphere->index))
+	if (check_shadow(data, hit, vec_scale(L_dir, -1.0), sphere->index))
 		return (to_rgb(vec_mult(data->ambient.color, sphere->color))); // Ambient light
 	else
-		return (phong_color(data, sphere->color, normal, hit, L)); // Do we really need to pass light? Cant I normalize the light inside data and we use it from there?
+		return (phong_color(data, sphere->color, normal, hit, L_dir)); // Do we really need to pass light? Cant I normalize the light inside data and we use it from there?
 
     // // Diffuse
 	// float diffuse = -dot_product(normal, L);
@@ -914,6 +920,7 @@ int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3
 
 	
 	float diffuse_dot = -dot_product(normal, light);
+	diffuse_dot *= data->light.brigthness;
 	if (diffuse_dot < 0)
 		diffuse_dot = 0;
 	diffuse = vec_scale(color, diffuse_dot);
