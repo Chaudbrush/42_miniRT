@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 13:24:22 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 14:30:31 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 22:22:55 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ int	render(t_program *data)
 	float	y;
 	double	x_screen;
 	double	y_screen;
-	t_vec3	camera_dir;
 
 	y = -1.0;
 	while (++y < HEIGHT)
@@ -29,8 +28,8 @@ int	render(t_program *data)
 		{
 			x_screen = x * 2 / WIDTH - 1;
 			y_screen = y * 2 / HEIGHT - 1;
-			camera_dir = camera_direction(data, x_screen, y_screen);
-			color = rt(data, camera_dir, 0, data->light.coords);
+			color = rt(data, camera_direction(data, x_screen, y_screen),
+					0, data->light.coords);
 			my_pixel_put(&data->img_data, x, y, color);
 		}
 	}

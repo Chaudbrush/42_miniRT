@@ -3,78 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   render_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:27:53 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 16:25:46 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 22:23:21 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minirt.h"
-
-// int	closest_vec(int *colors, t_vec3 **vecs, int total, t_vec3 camera)
-// {
-// 	int		i;
-// 	int		smallest_idx;
-// 	float	tdist;
-// 	float	dist;
-// 	t_vec3	*vec;
-
-// 	i = -1;
-// 	dist = 99999;
-// 	smallest_idx = 0;
-// 	while (++i < total)
-// 	{
-// 		if (colors[i] == -1)
-// 		{
-// 			i++;
-// 			continue ;
-// 		}
-// 		vec = vecs[i];
-// 		tdist = sqrt((camera.x - vec->x) * (camera.x - vec->x)
-// 				+ (camera.y - vec->y) * (camera.y - vec->y)
-// 				+ (camera.z - vec->z) * (camera.z - vec->z));
-// 		if (tdist < dist)
-// 		{
-// 			dist = tdist;
-// 			smallest_idx = i;
-// 		}
-// 	}
-// 	if (colors[smallest_idx] == -1)
-// 		return (0);
-// 	return (colors[smallest_idx]);
-// }
-
-int	closest_vec(int *colors, t_vec3 **vecs, int total, t_vec3 camera)
-{
-	int		i;
-	int		smallest_idx;
-	float	tdist;
-	float	dist;
-	t_vec3	*vec;
-
-	i = -1;
-	dist = 99999;
-	smallest_idx = 0;
-	while (++i < total)
-	{
-		if (colors[i] != -1)
-		{
-			vec = vecs[i];
-			tdist = sqrt((camera.x - vec->x) * (camera.x - vec->x)
-					+ (camera.y - vec->y) * (camera.y - vec->y)
-					+ (camera.z - vec->z) * (camera.z - vec->z));
-			if (tdist < dist)
-			{
-				dist = tdist;
-				smallest_idx = i;
-			}
-		}
-	}
-	if (colors[smallest_idx] == -1)
-		return (0);
-	return (colors[smallest_idx]);
-}
 
 int	get_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 light)
 {

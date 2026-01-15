@@ -1,6 +1,6 @@
 NAME := miniRT
 
-SRC := camera.c error_and_exit.c main.c mlx_utils.c render.c render_utils.c vec_utils1.c vec_utils2.c sphere.c plane.c cylinder.c
+SRC := camera.c error_and_exit.c main.c mlx_utils.c render.c render_utils.c vec_utils1.c vec_utils2.c sphere.c plane.c cylinder.c cylinder_helper.c
 
 PARSE := $(addprefix parse/, helper_functions.c init_data.c init_nodes.c lst_utils.c parse.c)
 
@@ -12,7 +12,7 @@ OBJ := $(SRC:.c=.o) $(PARSE:.c=.o) $(LIBFT:.c=.o) $(GNL:.c=.o)
 
 CC := cc
 
-CFLAGS :=
+CFLAGS := -Wall -Werror -Wextra
 
 LFLAGS := -Lminilibx-linux -lmlx_Linux -lX11 -lXext -lm
 

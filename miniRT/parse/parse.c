@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 12:22:12 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 22:27:24 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ int	parse_data(t_program *data, int argc, char **argv, int count)
 
 int	parse_line(t_program *data, char *str, t_types **objects, int flag)
 {
-	int		len;
 	char	**args;
 	t_types	*node;
 

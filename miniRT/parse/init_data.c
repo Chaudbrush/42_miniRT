@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_data.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:24:16 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 12:21:52 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 22:27:12 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ int	init_light(t_program *data, char **args)
 int	init_int_array(char *str, t_vec3 *color, char *type)
 {
 	int		i;
-	int		len;
 	int		nb;
 	char	**args;
 
@@ -100,7 +99,6 @@ int	init_int_array(char *str, t_vec3 *color, char *type)
 int	init_float_array(char *str, t_vec3 *vector, int flag, char *type)
 {
 	int		i;
-	int		len;
 	double	nb;
 	char	**args;
 
