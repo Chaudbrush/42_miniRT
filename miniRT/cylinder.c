@@ -88,6 +88,7 @@ int	shadow_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light,
 	t = cylinder_cap(cyl, ray_origin, dir, 1);
 	if (t > 0.0f && t < light_dist)
 		return (1);
+	t = cylinder_cap(cyl, ray_origin, dir, 0);
 	if (t > 0.0f && t < light_dist)
 		return (1);
 	return (0);
