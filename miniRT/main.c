@@ -1,35 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/10 11:13:29 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/28 12:28:31 by vloureir         ###   ########.fr       */
+/*   Created: 2026/01/15 13:24:04 by vloureir          #+#    #+#             */
+/*   Updated: 2026/01/15 13:58:52 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "minirt.h"
 
-int	ft_atoi(const char *nptr)
+int	main(int argc, char **argv)
 {
-	int	i;
-	int	sign;
-	int	nb;
+	t_program	data;
 
-	i = 0;
-	nb = 0;
-	sign = 1;
-	while ((nptr[i] >= '\t' && nptr[i] <= '\r') || nptr[i] == ' ')
-		i++;
-	if (nptr[i] == '-' || nptr[i] == '+')
-	{
-		if (nptr[i] == '-')
-			sign = -sign;
-		i++;
-	}
-	while (nptr[i] >= '0' && nptr[i] <= '9')
-		nb = (nb * 10) + nptr[i++] - '0';
-	return (nb * sign);
+	if (parse_data(&data, argc, argv, 0) || init_mlx(&data))
+		exit (1);
+	mlx_loop_hook(data.mlx, render, &data);
+	mlx_hook(data.win, DestroyNotify, NoEventMask, clean_exit, &data);
+	mlx_hook(data.win, KeyPress, KeyPressMask, key_handler, &data);
+	mlx_loop(data.mlx);
 }

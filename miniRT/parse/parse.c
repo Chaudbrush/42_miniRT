@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/07 14:12:34 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 12:22:12 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 int	parse_data(t_program *data, int argc, char **argv, int count)
 {

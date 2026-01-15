@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 14:25:18 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/26 19:07:31 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 14:08:09 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {

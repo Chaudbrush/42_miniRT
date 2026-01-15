@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:31:30 by vloureir          #+#    #+#             */
-/*   Updated: 2025/12/21 11:32:25 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 12:21:46 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 int	ft_strcmp(char *s1, char *s2)
 {
@@ -75,10 +75,4 @@ int	check_extenssion(char *str)
 	if (ft_strcmp(".rt", &str[i - 3]))
 		return (1);
 	return (0);
-}
-
-void	print_err(char *s1, char *s2)
-{
-	ft_putstr_fd(s1, 2);
-	ft_putstr_fd(s2, 2);
 }

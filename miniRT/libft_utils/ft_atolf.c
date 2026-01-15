@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 12:28:19 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/29 21:56:13 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 14:08:02 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 double	ft_atolf(char *str)
 {

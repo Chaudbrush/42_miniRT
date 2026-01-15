@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:30:03 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/12 14:32:15 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 12:22:06 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 void	ft_lstclear(t_types *lst)
 {
@@ -64,23 +64,19 @@ void	correct_string(char *str, char c)
 		str[len - 1] = ' ';
 }
 
-int check_vector(t_vec3 v, char *str)
+int	check_vector(t_vec3 v, char *str)
 {
-    float len;
-    float epsilon = 1e-2;
+	float	len;
+	float	epsilon;
 
-    len = sqrt(
-        v.x*v.x +
-        v.y*v.y +
-        v.z*v.z
-    );
-
-    if (fabs(len - 1.0f) > epsilon)
-    {
-        print_err(NORMALIZED_ERR, str);
-        return (1);
-    }
-    return (0);
+	epsilon = 1e-2;
+	len = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (fabs(len - 1.0f) > epsilon)
+	{
+		print_err(NORMALIZED_ERR, str);
+		return (1);
+	}
+	return (0);
 }
 
 // int	check_vector(t_vec3 v, char *str)

@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 21:24:16 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/07 14:12:01 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 12:21:52 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
 int	init_ambient(t_program *data, char **args)
 {

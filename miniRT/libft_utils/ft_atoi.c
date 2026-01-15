@@ -1,20 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/11 14:34:24 by vloureir          #+#    #+#             */
-/*   Updated: 2025/11/26 19:06:58 by vloureir         ###   ########.fr       */
+/*   Created: 2025/04/10 11:13:29 by vloureir          #+#    #+#             */
+/*   Updated: 2026/01/15 14:07:59 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../sphere.h"
+#include "../minirt.h"
 
-void	ft_putstr_fd(char *s, int fd)
+int	ft_atoi(const char *nptr)
 {
-	if (!s)
-		return ;
-	write(fd, s, ft_strlen(s));
+	int	i;
+	int	sign;
+	int	nb;
+
+	i = 0;
+	nb = 0;
+	sign = 1;
+	while ((nptr[i] >= '\t' && nptr[i] <= '\r') || nptr[i] == ' ')
+		i++;
+	if (nptr[i] == '-' || nptr[i] == '+')
+	{
+		if (nptr[i] == '-')
+			sign = -sign;
+		i++;
+	}
+	while (nptr[i] >= '0' && nptr[i] <= '9')
+		nb = (nb * 10) + nptr[i++] - '0';
+	return (nb * sign);
 }

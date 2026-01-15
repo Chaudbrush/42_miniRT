@@ -1,22 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   sphere.h                                           :+:      :+:    :+:   */
+/*   minirt.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/08 12:29:02 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/15 16:20:48 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SPHERE_H
-# define SPHERE_H
+#ifndef MINIRT_H
+# define MINIRT_H
 
 # include "gnl/get_next_line.h"
 # include "minilibx-linux/mlx.h"
 # include <fcntl.h>
-# include <float.h> // can use FLT_MIN and FLT_MAX, also DBL_MIN and DBL_MAX
+# include <float.h>
 # include <math.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -37,16 +37,25 @@
 # define INVALID_ERR "-error: Invalid identifier: "
 # define NORMALIZED_ERR "-error: Vector not normalized: "
 
-typedef unsigned char t_uchar;
+typedef unsigned char	t_uchar;
 
 typedef struct s_vec3
 {
-	float	x;
-	float	y;
-	float	z;
+	double	x;
+	double	y;
+	double	z;
 }	t_vec3;
 
-// TYPES: 'A' (ambient light), 'C' (camera), 'L' (light), 's' (sphere), 'y' (cylinder), 'p' (plane)
+typedef struct s_cam_math
+{
+	double	width;
+	double	height;
+	t_vec3	w;
+	t_vec3	v;
+	t_vec3	u;
+	t_vec3	vertical;
+}	t_cam_math;
+
 typedef struct s_types
 {
 	int				type;
@@ -59,7 +68,7 @@ typedef struct s_sphere
 	t_types	*next;
 	int		index;
 	t_vec3	coords;
-	float	radius;
+	double	radius;
 	t_vec3	color;
 }	t_sphere;
 
@@ -80,14 +89,14 @@ typedef struct s_cylinder
 	int		index;
 	t_vec3	coords;
 	t_vec3	vector;
-	float	radius;
-	float	height;
+	double	radius;
+	double	height;
 	t_vec3	color;
 }	t_cylinder;
 
 typedef struct s_ambient
 {
-	float	ratio;
+	double	ratio;
 	t_vec3	color;
 }	t_ambient;
 
@@ -101,7 +110,7 @@ typedef struct s_camera
 typedef struct s_light
 {
 	t_vec3	coords;
-	float	brigthness;
+	double	brigthness;
 	t_vec3	color;
 }	t_light;
 
@@ -123,7 +132,7 @@ typedef struct s_program
 	t_camera	camera;
 	t_light		light;
 	t_types		*objects;
-	float		hitpoint;
+	double		hitpoint;
 }	t_program;
 
 // Parse
@@ -132,8 +141,6 @@ int		is_valid_float(char *str, double nb);
 int		check_args(int argc, char **argv, int *fd);
 int		parse_data(t_program *data, int argc, char **argv, int count);
 int		parse_line(t_program *data, char *str, t_types **objects, int flag);
-
-
 
 // Helper Functions
 void	free_args(char **argv);
@@ -154,6 +161,7 @@ t_types	*init_plane(char **args);
 t_types	*init_sphere(char **args);
 t_types	*init_cylinder(char **args);
 t_types	*initialize_node(char **args);
+void	print_err(char *s1, char *s2);
 
 // Lst Utils
 void	index_list(t_types *lst);
@@ -162,57 +170,64 @@ void	correct_string(char *str, char c);
 int		check_vector(t_vec3 v, char *str);
 void	ft_lstadd_back(t_types **lst, t_types *node);
 
+// Camera
+t_vec3	camera_direction(t_program *data, float v, float u);
 
-
-
-
-int		check_shadow(t_program *data, t_vec3 ray_origin, t_vec3 ray_dir, int i);
-int 	shadow_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data, t_vec3 ray_origin);
-int		shadow_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data, t_vec3 ray_origin);
-int		shadow_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data, t_vec3 ray_origin);
-
-
-
-// NOT ORGANIZED
-
-int		render(t_program *data);
-int		init_mlx(t_program *data);
+// Error and Exit
 int		clean_exit(t_program *data);
+void	abort_mlx(t_program *data, int flag);
+
+// Mlx Utils
+int		init_mlx(t_program *data);
 int		key_handler(int keysym, t_program *data);
 void	my_pixel_put(t_img *img, int x, int y, int color);
-int		render_circle(t_program *data, double column, double row);
 
+// Plane
+int		raytrace_plane(t_vec3 dir, t_plane *plane,
+			t_vec3 light, t_program *data);
+int		shadow_plane(t_vec3 dir, t_plane *plane,
+			t_vec3 light, t_vec3 ray_origin);
 
+// Render Utils
+int		closest_vec(int *colors, t_vec3 **vecs, int total, t_vec3 camera);
+int		get_color(t_program *data, t_vec3 color,
+			t_vec3 normal, t_vec3 light);
+int		check_shadow(t_program *data, t_vec3 ray_origin,
+			t_vec3 ray_dir, int i);
 
+// Render
+int		to_rgb(t_vec3 c);
+int		render(t_program *data);
+int		rt(t_program *data, t_vec3 ray_dir, int color, t_vec3 light);
+
+// Vec Utils 1
+t_vec3	normalize_vector(t_vec3 vector);
+t_vec3	vec_add(t_vec3 vec1, t_vec3 vec2);
+t_vec3	vec_sub(t_vec3 vec1, t_vec3 vec2);
+t_vec3	vec_mult(t_vec3 vec1, t_vec3 vec2);
+
+// Vec Utils 2
+t_vec3	vec_scale(t_vec3 vector, float s);
+t_vec3	vec_cross(t_vec3 vec1, t_vec3 vec2);
+float	dot_product(t_vec3 vec1, t_vec3 vec2);
+
+// Sphere
+int		raytrace_sphere(t_vec3 dir, t_sphere *sphere,
+			t_vec3 light, t_program *data);
+int		shadow_sphere(t_vec3 dir, t_sphere *sphere,
+			t_vec3 light, t_vec3 ray_origin);
+
+// Cylinder
+int		raytrace_cylinder(t_vec3 dir, t_cylinder *cyl,
+			t_vec3 light, t_program *data);
+int		shadow_cylinder(t_vec3 dir, t_cylinder *cyl,
+			t_vec3 light, t_vec3 ray_origin);
+
+// Libft Utils
 double	ft_atolf(char *str);
 int		ft_atoi(const char *nptr);
 void	ft_putstr_fd(char *s, int fd);
 char	**ft_split(char const *s, char c);
 size_t	ft_strlcpy(char *dst, const char *src, size_t size);
-
-
-
-int to_rgb(t_vec3 c);
-
-int	rt(t_program *data, t_vec3 vec);
-int raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data);
-int raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data);
-int raytrace_cylinder(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data);
-
-// Vector Functions
-t_vec3	normalize_vector(t_vec3 vector);
-t_vec3	vec_add(t_vec3 vec1, t_vec3 vec2);
-t_vec3	vec_sub(t_vec3 vec1, t_vec3 vec2);
-t_vec3	vec_scale(t_vec3 vector, float s);
-t_vec3	vec_mult(t_vec3 vec1, t_vec3 vec2);
-float	dot_product(t_vec3 v1, t_vec3 v2);
-
-int	phong_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 hit, t_vec3 light);
-
-
-// DELETE
-void	print_list(t_types *lst);
-
-void	print_err(char *s1, char *s2);
 
 #endif
