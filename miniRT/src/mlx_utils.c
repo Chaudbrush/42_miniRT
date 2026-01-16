@@ -6,28 +6,28 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:20:30 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 15:56:22 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:44 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 int	init_mlx(t_program *data)
 {
 	data->mlx = mlx_init();
 	if (!data->mlx)
-		exit(1);
+		return (abort_mlx(data, 0), 1);
 	data->win = mlx_new_window(data->mlx, WIDTH, HEIGHT, "miniRT");
 	if (!data->win)
-		abort_mlx(data, 1);
+		return (abort_mlx(data, 1), 1);
 	data->img_data.img = mlx_new_image(data->mlx, WIDTH, HEIGHT);
 	if (!data->img_data.img)
-		abort_mlx(data, 2);
+		return (abort_mlx(data, 2), 1);
 	data->img_data.addr = mlx_get_data_addr(data->img_data.img,
 			&data->img_data.bpp, &data->img_data.line_len,
 			&data->img_data.endian);
 	if (!data->img_data.addr)
-		abort_mlx(data, 3);
+		return (abort_mlx(data, 3), 1);
 	return (0);
 }
 

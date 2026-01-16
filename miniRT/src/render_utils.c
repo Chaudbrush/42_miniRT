@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   render_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:27:53 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 22:23:21 by zali             ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:48 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 int	get_color(t_program *data, t_vec3 color, t_vec3 normal, t_vec3 light)
 {

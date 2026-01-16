@@ -1,4 +1,4 @@
-#include "minirt.h"
+#include "../minirt.h"
 
 float	cylinder_cap(t_cylinder *cyl, t_vec3 ray_origin, t_vec3 dir, int top)
 {

@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:30:33 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 16:11:30 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:40 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 int	clean_exit(t_program *data)
 {
@@ -24,7 +24,7 @@ int	clean_exit(t_program *data)
 
 void	abort_mlx(t_program *data, int flag)
 {
-	// CHECK THIS BETTER !!!
+	ft_lstclear(data->objects);
 	if (flag == 1)
 	{
 		mlx_destroy_display(data->mlx);
@@ -43,7 +43,6 @@ void	abort_mlx(t_program *data, int flag)
 		mlx_destroy_display(data->mlx);
 		free(data->mlx);
 	}
-	exit (1);
 }
 
 void	print_err(char *s1, char *s2)

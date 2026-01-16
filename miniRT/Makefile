@@ -1,6 +1,7 @@
 NAME := miniRT
 
-SRC := camera.c error_and_exit.c main.c mlx_utils.c render.c render_utils.c vec_utils1.c vec_utils2.c sphere.c plane.c cylinder.c cylinder_helper.c
+SRC := $(addprefix src/, camera.c error_and_exit.c main.c mlx_utils.c render.c render_utils.c \
+		vec_utils1.c vec_utils2.c sphere.c plane.c cylinder.c cylinder_helper.c)
 
 PARSE := $(addprefix parse/, helper_functions.c init_data.c init_nodes.c lst_utils.c parse.c)
 
@@ -18,6 +19,8 @@ LFLAGS := -Lminilibx-linux -lmlx_Linux -lX11 -lXext -lm
 
 RM := rm -f
 
+REPO := https://github.com/42paris/minilibx-linux.git
+
 MLX := ./minilibx-linux/
 
 HEADER := minirt.h
@@ -28,6 +31,9 @@ $(NAME): $(OBJ) $(HEADER)
 	$(MAKE) -C $(MLX)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LFLAGS) -I.
 
+mlx:
+	git clone $(REPO)
+
 clean:
 	$(RM) $(OBJ)
 
@@ -36,4 +42,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re mlx

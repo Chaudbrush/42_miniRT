@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:14:03 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 15:30:30 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:46 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 int	raytrace_plane(t_vec3 dir, t_plane *plane, t_vec3 light, t_program *data)
 {

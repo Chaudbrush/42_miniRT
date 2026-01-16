@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 16:18:34 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 16:18:44 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:58 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 t_vec3	vec_scale(t_vec3 vector, float s)
 {

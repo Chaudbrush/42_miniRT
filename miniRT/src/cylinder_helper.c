@@ -1,4 +1,4 @@
-#include "minirt.h"
+#include "../minirt.h"
 
 t_vec3	perp_component(t_vec3 v, t_vec3 axis)
 {

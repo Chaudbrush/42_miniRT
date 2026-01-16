@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minirt.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:24:39 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 19:29:55 by zali             ###   ########.fr       */
+/*   Updated: 2026/01/16 07:54:15 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,13 +218,19 @@ int		shadow_sphere(t_vec3 dir, t_sphere *sphere,
 			t_vec3 light, t_vec3 ray_origin);
 
 // Cylinder
-t_vec3	cylinder_normal(t_cylinder *cyl, t_vec3 hit);
-t_vec3	perp_component(t_vec3 v, t_vec3 axis);
-float	cylinder_quadratic(t_vec3 ray_origin, t_vec3 dir, t_cylinder *cyl);
+float	cylinder_cap(t_cylinder *cyl, t_vec3 ray_origin, t_vec3 dir, int top);
+int		cap_color(t_vec3 dir, t_cylinder *cyl, t_vec3 light, t_program *data);
+int		hit_inside_cylinder(t_cylinder *cyl,
+			t_vec3 ray_origin, t_vec3 dir, float t);
+int		shadow_cylinder(t_vec3 dir, t_cylinder *cyl,
+			t_vec3 light, t_vec3 ray_origin);
 int		raytrace_cylinder(t_vec3 dir, t_cylinder *cyl,
 			t_vec3 light, t_program *data);
-int		shadow_cylinder(t_vec3 dir, t_cylinder *cyl,
-		t_vec3 light, t_vec3 ray_origin);
+
+// Cylinder Helper
+t_vec3	perp_component(t_vec3 v, t_vec3 axis);
+t_vec3	cylinder_normal(t_cylinder *cyl, t_vec3 hit);
+float	cylinder_quadratic(t_vec3 ray_origin, t_vec3 dir, t_cylinder *cyl);
 
 // Libft Utils
 double	ft_atolf(char *str);

@@ -6,11 +6,11 @@
 /*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 13:34:16 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 13:50:50 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:31 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 static t_vec3	find_v(t_vec3 camera);
 

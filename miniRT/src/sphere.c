@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   sphere.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 22:26:42 by zali             ###   ########.fr       */
+/*   Updated: 2026/01/16 07:58:53 by vloureir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minirt.h"
+#include "../minirt.h"
 
 static float	quadratic_helper(t_vec3 dir, t_vec3 oc, float radius)
 {
