@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sphere.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vloureir <vloureir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 10:25:11 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/16 07:58:53 by vloureir         ###   ########.fr       */
+/*   Updated: 2026/01/16 12:36:41 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,13 +41,13 @@ int	raytrace_sphere(t_vec3 dir, t_sphere *sphere, t_vec3 light, t_program *data)
 	t_vec3	ray_origin;
 	t_vec3	hit;
 	t_vec3	light_dir;
-	int		t;
+	float	t;
 
 	ray_origin = data->camera.coords;
 	t = quadratic_helper(dir, vec_sub(ray_origin, sphere->coords),
 			sphere->radius);
 	if (t < 0)
-		return (0xFFFF0000);
+		return (-1);
 	data->hitpoint = t;
 	hit = vec_add(ray_origin, vec_scale(dir, t));
 	light_dir = normalize_vector(vec_sub(hit, light));
