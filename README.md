@@ -17,13 +17,16 @@ In the mandatory part of the subject, you need to:
 ---
 
 ## Instructions
-To use the program you need to use minilibx, which is a library made by 42 School which abstracts some things from the X11 system, to make it easier for students to get started into graphical programs. There are different versions of minilibx, but the one we are using here works on Ubuntu, can't gurantee it works on every Linux distributions.
+To use the program you need to use minilibx, which is a library made by 42 School which abstracts some things from the X11 system, to make it easier for students to get started into graphical programs.
+
+There are different versions of minilibx, but the one we are using here works on Ubuntu, can't gurantee it works on every Linux distributions.
 
 ### Compilation
 To compile, just to do the root of the repository and use `make mlx` (to download the minilibx from the 42 repository) and use `make` after that, to compile all the necessary files.
 
 ### Usage Example
 To use the program, start it with `./miniRT` and you need to pass a scene for it to render, it must be in the `.rt` format.
+
 In the scene, you need to have something like the example below:
 ```
 A 0.2         230,170,100
@@ -54,6 +57,7 @@ cy 0.4,0.0,-0.5 0.4082,0.8165,0.4082 0.1   0.1   0,255,255
 
 ### AI Usage
 AI was used to have a clearer understading of the vector formulas.
+
 It was also used for debugging purposes
 
 ---
