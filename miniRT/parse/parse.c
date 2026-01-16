@@ -6,7 +6,7 @@
 /*   By: zali <zali@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:29:33 by vloureir          #+#    #+#             */
-/*   Updated: 2026/01/15 22:27:24 by zali             ###   ########.fr       */
+/*   Updated: 2026/01/16 11:28:44 by zali             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,8 @@ int	is_valid_float(char *str, double nb)
 		i++;
 	while (str[i])
 	{
+		if (str[i] == '.' && ft_strlen(str + i) > 5)
+			return (0);
 		if (str[i] == '.' && str[i + 1])
 			point++;
 		else if (str[i] < '0' || str[i] > '9')
