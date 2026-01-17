@@ -53,7 +53,9 @@ cy 0.4,0.0,-0.5 0.4082,0.8165,0.4082 0.1   0.1   0,255,255
 
 [Great series on a Raytracing implementation](https://www.youtube.com/watch?v=gfW1Fhd9u9Q&list=PLlrATfBNZ98edc5GshdBtREv5asFW3yXl)
 
-[Great series about how to handle vector math](https://www.youtube.com/watch?v=VofMMbD2QtQ&list=PL3WoIG-PLjSv9vFx2dg0BqzDZH_6qzF8-)
+[Series about how to handle vector math](https://www.youtube.com/watch?v=VofMMbD2QtQ&list=PL3WoIG-PLjSv9vFx2dg0BqzDZH_6qzF8-)
+
+[Useful information about the formulas for each of the primitives used in the project](https://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html)
 
 ### AI Usage
 AI was used to have a clearer understading of the vector formulas.
